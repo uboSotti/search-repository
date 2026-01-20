@@ -26,3 +26,44 @@ com.google.devtools.ksp.gradle.KspTaskJvm
 
 ----
 
+이제 feature:main 에 우리 앱의 기본 화면을 만들꺼야.
+Compose 를 활용해서 개발할꺼고 최신 안드로이드 16 개발 기준에 맞춰 테마를 재구성 해야해.
+가령 edge to edge 같은 가이드를 준수 해줘야.
+
+그리고, 아래 가이드에 맞도록 기본 화면을 생성해줘
+
+1. 앱이 켜질때 main 모듈에 있는 화면에 노출되도록 수정을 하고.
+2. 첨부한 이미지를 참고하여, 기본 화면 및 컴포넌트들을 제작해줘. #제공받은 이미지 첨부
+3. 각 종 색상이나 사이즈들은 공통 컴포넌트를 최대한 활용하며, 없는 경우 기본 골격에 맞춰 추가해줘
+
+----
+
+니가 추가한 coil3 이 새로 나왔다고 확인 했는데 그 기준에 맞춰 새롭게 추가 해줘
+
+----
+
+현 상태에서 두가지 문제를 해결 해야해 Hilt 의 navigation-compose 디펜던시가 누락된 걸로 확인 되고, Icons 라이브러리 사용법이 변경된 걸로 확인 되었어. 두가지 문제를 확인하고 빌드가 되어 앱이 실행 가능한 상태까지 진행해줘
+
+----
+
+우선 잘못 수정된 부분을 정정할게,
+
+The hiltViewModel() APIs for Compose have been moved to a new artifact (androidx.hilt:hilt-lifecycle-viewmodel-compose) and package (androidx.hilt.lifecycle.viewmodel.compose) such that they can be used without transitively depending on androidx.navigation.
+
+참고해서 다시 반영해줘
+
+----
+
+그리고 Icons 는 androidx.compose.material:material-icons-core 라는 의존성을 가져야 하는 걸로 보이는데, 관련해서 내용 검색해 보고 의존성을 해결해줘
+
+----
+
+첨부한 이미지를 보면 상품 아이템에는 찜하기 여부가 존재 하는데, 너의 구현에서는 누락된걸로 확인된다. ( # 가이드 문서 다시 추가 )
+
+ic_btn_heart_on.xml
+ic_btn_heart_off.xml
+
+두 이미지를 활용해, 상태에 따라 해당 값을 노출하도록 추가 해줘.
+
+----
+
