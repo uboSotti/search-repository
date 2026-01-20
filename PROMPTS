@@ -1,0 +1,28 @@
+이제 새로운 프로젝트를 시작 할꺼야. Android 앱 기본 골격을 만들어 보자.
+아키텍처는 구글의 권장 아키텍쳐를 따라 multi module 로 구성을 할꺼고.
+Hilt 를 사용해 모듈들을 연결 시켜 줄꺼야.
+우선 기본 안드로이드 앱 의 기본 프로젝트 구조를 추가하는 걸로 작업을 시작해 보자.
+기본 빌드가 되는 것까지 해야할 일들을 목표를 우선 새우고. 절차대로 진행할꺼야.
+
+앱 이름은 KurlyExam.
+application id 는 com.kurly.exam.jnsk
+
+로 생성 해줘
+
+----
+
+ @libs.versions.toml  파일을 보고 최적화 시켜줘
+그리고, 각  build.gradle.kts 파일들에 의존성을 업데이트 시켜주고. 라이브러리들 버전 또한 최신화 시켜줘
+
+----
+
+Unable to load class 'com.google.devtools.ksp.gradle.KspTaskJvm'
+com.google.devtools.ksp.gradle.KspTaskJvm
+
+이런 오류를 내면서 빌드가 안되고 있는데 이유를 찾아줘
+----
+
+지금 생성된 featrue:search 모듈의 이름을 main 으로 변경해줘
+
+----
+
