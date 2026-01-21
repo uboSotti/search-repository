@@ -26,21 +26,23 @@ android {
 }
 
 dependencies {
+    // Project Modules (가나다순)
+    implementation(project(":core:common"))
     implementation(project(":core:domain"))
     implementation(project(":core:ui"))
-    implementation(project(":core:common"))
 
-    implementation(libs.hilt.android)
-    ksp(libs.hilt.compiler)
-    implementation(libs.hilt.lifecycle.viewmodel.compose)
+    // AndroidX Core & Lifecycle
+    implementation(libs.androidx.core.ktx)
+    implementation(libs.androidx.lifecycle.runtime.ktx)
+    implementation(libs.androidx.activity.compose)
 
-    implementation(libs.core.ktx)
-    implementation(libs.lifecycle.runtime.ktx)
-    implementation(libs.activity.compose)
-
-    implementation(platform(libs.compose.bom))
+    // Compose
+    implementation(platform(libs.androidx.compose.bom))
     implementation(libs.bundles.compose)
-    implementation(libs.compose.material.icons)
-
     implementation(libs.coil.compose)
+
+    // Hilt
+    implementation(libs.hilt.android)
+    implementation(libs.hilt.lifecycle.viewmodel.compose)
+    ksp(libs.hilt.compiler)
 }

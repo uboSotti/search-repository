@@ -23,7 +23,8 @@ android {
 }
 
 dependencies {
-    implementation(libs.core.ktx)
-    implementation(platform(libs.compose.bom))
+    implementation(libs.androidx.core.ktx)
+
+    implementation(platform(libs.androidx.compose.bom))
     implementation(libs.bundles.compose)
 }

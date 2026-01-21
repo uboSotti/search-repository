@@ -1,6 +1,6 @@
 plugins {
     alias(libs.plugins.android.library)
-
+    alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.ksp)
     alias(libs.plugins.hilt)
 }
@@ -28,9 +28,16 @@ android {
 }
 
 dependencies {
-    implementation(project(":core:domain"))
+    // Project Modules (가나다순)
     implementation(project(":core:common"))
+    implementation(project(":core:domain"))
+    implementation(project(":core:network"))
 
+    // Network
+    implementation(libs.retrofit.core)
+    implementation(libs.kotlinx.serialization.json)
+
+    // Hilt
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)
 }
