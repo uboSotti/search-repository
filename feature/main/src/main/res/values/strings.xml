@@ -1,0 +1,5 @@
+<resources>
+    <string name="feature_main_app_bar_title">Kurly Exam</string>
+    <string name="feature_main_price_format">₩%,d</string>
+    <string name="feature_main_discount_rate_format">%1$d%%</string>
+</resources>

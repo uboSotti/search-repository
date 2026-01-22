@@ -8,138 +8,223 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowForward
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.kurly.exam.core.domain.model.Section
-import com.kurly.exam.core.ui.theme.KurlyExamTheme
+import com.kurly.exam.feature.main.components.ProductDisplayStyle
 import com.kurly.exam.feature.main.components.ProductItem
+import com.kurly.exam.feature.main.components.SectionHeader
+
+// 상수 정의
+private val SECTION_DIVIDER_THICKNESS = 10.dp
+private val PADDING_HORIZONTAL_DEFAULT = 16.dp
+private val PADDING_VERTICAL_DEFAULT = 12.dp
+private val PADDING_BOTTOM_LIST = 20.dp
+private val SPACER_HEIGHT_DIVIDER = 24.dp
+private val GRID_ROW_SPACING = 12.dp
+private val GRID_COL_SPACING = 12.dp
 
 @Composable
 fun MainRoute(
-    viewModel: MainViewModel = hiltViewModel()
+    viewModel: MainViewModel = hiltViewModel(),
+    onProductClick: (ProductUiModel) -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    MainScreen(uiState = uiState)
+    
+    val refreshData = remember(viewModel) { viewModel::refreshData }
+    val toggleFavorite = remember(viewModel) { viewModel::toggleFavorite }
+
+    MainScreen(
+        uiState = uiState,
+        onRefresh = refreshData,
+        onToggleFavorite = toggleFavorite,
+        onProductClick = onProductClick
+    )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainScreen(
-    uiState: MainUiState
+    uiState: MainUiState,
+    onRefresh: () -> Unit,
+    onToggleFavorite: (Int) -> Unit,
+    onProductClick: (ProductUiModel) -> Unit
 ) {
     Scaffold(
         topBar = {
-            TopAppBar(title = { Text("Kurly Exam") })
+            TopAppBar(title = { Text(text = stringResource(id = R.string.feature_main_app_bar_title)) })
         }
     ) { paddingValues ->
-        if (uiState.isLoading) {
-            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                CircularProgressIndicator()
-            }
-        } else if (uiState.errorMessage != null) {
-            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                Text(text = uiState.errorMessage)
-            }
-        } else {
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                items(uiState.sections, key = { it.id }) { section ->
-                    ProductSection(section = section)
-                    HorizontalDivider(color = Color.LightGray)
+        PullToRefreshBox(
+            isRefreshing = uiState.isLoading,
+            onRefresh = onRefresh,
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+        ) {
+            if (uiState.errorMessage != null && !uiState.isLoading && uiState.sectionModels.isEmpty()) {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    Text(text = uiState.errorMessage)
+                }
+            } else {
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize(),
+                    contentPadding = PaddingValues(bottom = PADDING_BOTTOM_LIST)
+                ) {
+                    uiState.sectionModels.forEachIndexed { index, sectionModel ->
+                        val sectionId = sectionModel.section.id
+                        
+                        sectionHeader(title = sectionModel.section.title, key = "header-$sectionId")
+
+                        when (sectionModel.section.type) {
+                            "horizontal" -> horizontalSection(
+                                sectionId = sectionId,
+                                products = sectionModel.products,
+                                onToggleFavorite = onToggleFavorite,
+                                onProductClick = onProductClick
+                            )
+
+                            "grid" -> gridSection(
+                                sectionId = sectionId,
+                                products = sectionModel.products,
+                                onToggleFavorite = onToggleFavorite,
+                                onProductClick = onProductClick
+                            )
+
+                            "vertical" -> verticalSection(
+                                sectionId = sectionId,
+                                products = sectionModel.products,
+                                onToggleFavorite = onToggleFavorite,
+                                onProductClick = onProductClick
+                            )
+                        }
+
+                        if (index != uiState.sectionModels.lastIndex) {
+                            sectionDivider(key = "divider-$sectionId")
+                        }
+                    }
                 }
             }
         }
     }
 }
 
-@Composable
-fun ProductSection(
-    modifier: Modifier = Modifier,
-    section: Section
+private fun LazyListScope.sectionHeader(title: String, key: Any) {
+    item(key = key) {
+        SectionHeader(title = title)
+    }
+}
+
+private fun LazyListScope.horizontalSection(
+    sectionId: Int,
+    products: List<ProductUiModel>,
+    onToggleFavorite: (Int) -> Unit,
+    onProductClick: (ProductUiModel) -> Unit
 ) {
-    Column(modifier) {
-        SectionTitle(
-            modifier = Modifier.padding(16.dp),
-            title = section.title
-        )
-        // TODO: section.type에 따라 다른 Composable 표시 (Horizontal, Grid, Vertical)
+    item(key = "horizontal-$sectionId") {
         LazyRow(
-            contentPadding = PaddingValues(horizontal = 16.dp),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
+            contentPadding = PaddingValues(horizontal = PADDING_HORIZONTAL_DEFAULT),
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            items(5) { // TODO: GetSectionProductsUseCase 호출하여 실제 데이터로 교체
+            items(
+                items = products,
+                key = { it.id }
+            ) { product ->
                 ProductItem(
-                    modifier = Modifier.width(150.dp),
-                    imageUrl = "https://picsum.photos/id/${it}/150/200",
-                    title = "[샐러딩] 레디믹스 스탠다드 150g",
-                    originalPrice = 8000,
-                    discountedPrice = 6200,
-                    isWished = false,
-                    onWishClick = {}
+                    product = product,
+                    displayStyle = ProductDisplayStyle.HORIZONTAL,
+                    onWishClick = { onToggleFavorite(product.id) },
+                    onProductClick = { onProductClick(product) }
                 )
             }
         }
     }
 }
 
-@Composable
-fun SectionTitle(
-    modifier: Modifier = Modifier,
-    title: String
+private fun LazyListScope.gridSection(
+    sectionId: Int,
+    products: List<ProductUiModel>,
+    onToggleFavorite: (Int) -> Unit,
+    onProductClick: (ProductUiModel) -> Unit
 ) {
-    Row(
-        modifier = modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Text(
-            text = title,
-            style = MaterialTheme.typography.titleMedium.copy(
-                fontWeight = FontWeight.Bold,
-                fontSize = 18.sp
-            )
-        )
-        Spacer(modifier = Modifier.weight(1f))
-        Icon(
-            imageVector = Icons.AutoMirrored.Filled.ArrowForward,
-            contentDescription = "더보기",
-            tint = Color.Gray
+    item(key = "grid-$sectionId") {
+        val displayProducts = products.take(6)
+        
+        Column(
+            modifier = Modifier.padding(horizontal = PADDING_HORIZONTAL_DEFAULT),
+            verticalArrangement = Arrangement.spacedBy(GRID_COL_SPACING)
+        ) {
+            displayProducts.chunked(3).forEach { rowProducts ->
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(GRID_ROW_SPACING)
+                ) {
+                    rowProducts.forEach { product ->
+                        Box(modifier = Modifier.weight(1f)) {
+                            ProductItem(
+                                product = product,
+                                displayStyle = ProductDisplayStyle.GRID,
+                                onWishClick = { onToggleFavorite(product.id) },
+                                onProductClick = { onProductClick(product) },
+                                modifier = Modifier.fillMaxWidth()
+                            )
+                        }
+                    }
+                    
+                    repeat(3 - rowProducts.size) {
+                        Spacer(modifier = Modifier.weight(1f))
+                    }
+                }
+            }
+        }
+    }
+}
+
+private fun LazyListScope.verticalSection(
+    sectionId: Int,
+    products: List<ProductUiModel>,
+    onToggleFavorite: (Int) -> Unit,
+    onProductClick: (ProductUiModel) -> Unit
+) {
+    items(
+        items = products,
+        key = { "vertical-$sectionId-${it.id}" }
+    ) { product ->
+        ProductItem(
+            product = product,
+            displayStyle = ProductDisplayStyle.VERTICAL,
+            onWishClick = { onToggleFavorite(product.id) },
+            onProductClick = { onProductClick(product) },
+            modifier = Modifier.padding(horizontal = PADDING_HORIZONTAL_DEFAULT, vertical = PADDING_VERTICAL_DEFAULT)
         )
     }
 }
 
-
-@Preview(showBackground = true)
-@Composable
-private fun MainScreenPreview() {
-    KurlyExamTheme {
-        MainScreen(uiState = MainUiState(sections = listOf(Section("Title", 1, "horizontal", ""))))
+private fun LazyListScope.sectionDivider(key: Any) {
+    item(key = key) {
+        Spacer(modifier = Modifier.height(SPACER_HEIGHT_DIVIDER))
+        HorizontalDivider(
+            thickness = SECTION_DIVIDER_THICKNESS, 
+            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f)
+        )
     }
 }

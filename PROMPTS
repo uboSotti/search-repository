@@ -186,3 +186,114 @@ https://raw.githubusercontent.com/square/retrofit/refs/heads/trunk/retrofit-conv
    이제 :mockserver 의 테스트 들을 정리해줘 불필요한 부분들은 삭제 하면돼
 ----
 
+이제 본격적으로 UI 작업을 시작할거야.
+
+데이터에 대한 이해를 돕기 위한 이미지 파일과 main 화면에 대한 전반적인 정의가 그려진 이미지 파일 두개를 참조 했고.
+
+1) 메인 기본
+- 메인은 여러개의 섹션으로 이루어져 있다.
+
+2) 섹션
+- 아래의 sections api 에서 페이지 정보와 함께 섹션의 정보를  리스트로 내려준다.
+-  섹션은 3개의 타입이 있다.
+   (1)vertical : 세로 스크롤이 가능한 섹션
+   (2)horizontal : 가로 스크롤이 가능한 섹션
+   (3)grid : 3(col) x 2(row) 총 6개의 상품을 볼 수 있는 섹션
+- 각 섹션마다 title 이 있어 상품과 별도로 노출이 필요하다.
+- 한 섹션마다 여러 개의 상품이 있다.
+
+3) 상품
+- 아래의 section/products api 에서 해당 섹션에 포함된 상품목록을 내려준다.
+- 상품은 vertical, grid //  horizontal  두개의 뷰가 모양이 다르다.
+- 제목
+  (1) horizontal, grid 형태에서는 2줄과 말줄임 처리해서 보여준다.
+  (2) vertical 에서는 한줄과 말줄임 처리해서 보여준다.
+- 가격
+  (1) 할인이 있을 경우 할인율(#fa622f), 할인가격(bold)과 원래가격(취소선) 을 보여준다.
+  (2) 할인이 없을 경우 원래가격만 노출한다.
+  (3) horizontal,grid 형태에서는 첫번째 줄에 할인율, 할인가격을 보여주고, 두번째 줄에 원래가격을 보여준다.
+  (4) vertical 형태에서는 한줄에 모든 가격정보를 보여준다.
+*좀 더 자세한 ui 는 위의 UI 링크를 참고하자.
+*모든 상품은 찜하기가 가능하다.
+
+4) 찜하기
+- 찜하기 기능은 서버 없이 구현이 필요하다.
+- 찜하기 여부에 따라 찜하기 아이콘을 다르게 보여줘야한다.
+
+5) 새로고침
+- 메인화면은 pull to refresh 를 이용해서 새로고침을 제공한다.
+
+위와 같은 요구 사항을 가지고 있어.
+
+현재 파일을 기준으로 우리의 요구 사항을 충족 시킬 전략을 세우고 어떤 작업들을 수행하면 좋을지 리스트업 해줘.
+그리고 찜하기 기능은 우선 MainViewModel 내부에서 임시로 저장하는 걸로 처리하고 TODO 로 dataStore 를 활용해 저장해야 한다고 표기 해줘
+
+*작업시 지켜야 할 룰
+- Jetpack Compose 를 활용할것.
+- Jetpack library 를 가급적 활용할것.
+- Compose 의 다양한 최적화 기법들을 활용해 recomposition 을 최소하 시킬 수 있는 방안을 고려한다.
+- 컴포넌트화 시킬 수 있는 항목들을 잘 분리해 커버리지를 높인다.
+- 심미적인 것들을 고려한 요소들을 추가해도 좋다.
+
+----
+
+동작은 확인 했어.
+
+이제  현재파일에서 수정할 부분들을 얘기 할게.
+- 장바구니 기능은 요구사항에 없음으로 삭제
+- 불필요한 주석 제거 할것
+- 필요한 구간에는 remember{} 활용해 리컴포즈 가 발생할때 성능 최적화에 이점을 주기
+- 가독성을 높이기 위한 작업들을 추가로 실행 할것.
+ a. SectionHeader() 을 LazyListScope.SectionHeader() 로 만들어서 함수 안으로 item(..) { ... } 을 넣어서 처리 할것
+ b. 각종 Padding 또는 마진 등의 상수 숫자들은 별도의 값으로 분리해 static 상수화 시킬것.
+ c. 가급적 생성되는 색상등은 MaterialTheme.colorScheme 을 활용해 처리 할것.
+- 상품을 클릭하면, 새로운 창이 열릴수 있는 구조로 만들것.
+- 가급적 확장성 있는 구조로 만들어 다음 수정에 대비 할것
+
+----
+
+추가 수정할 내역을 얘기 할께.
+
+1.  @ProductItem.kt  에서 Coil3 을 활용한 이미지 표시를 시도하고 있는데, 잘못된 가이드를 참고 한거 같아서. 내가 올바른 가이드를 첨부해 줄게.
+https://coil-kt.github.io/coil/getting_started/
+
+2. typography 나 textStyle 을 copy 해서 사용할때는 private static 상수화 시켜서 사용하도록 개선해줘.
+
+3.  @SectionHeader.kt  파일에는 우리가 이야기 했던 개선점들이 반영 되어 있지 않아 다시 한번 :main 모듈을 탐색해 빠진 파일들이 없는지 확인 해줘
+
+----
+
+하드코딩된 text 들을 strings.xml 로 이관 시키는 작업들을 진행해줘.
+
+생성할때 주의할 점은 기본 언어는 en 이고 번역본으로 kr 을 추가 해서 다국어 지원이 될 수 있도록 추가 해줘
+
+----
+
+Coil3 를 활용해 이미지를 표시하는 방법에 대해 수정할 걸 다시 한번 요청할게.
+'''
+AsyncImage(
+    model = "https://example.com/image.jpg",
+    contentDescription = null,
+)
+'''
+위 와 같이 사용하면 되고.
+
+우리가 시도하던 crossfade 는 아래 참조 처럼 Application 에 인터페이스로 처리 해줘야해.
+
+'''
+class CustomApplication : Application(), SingletonImageLoader.Factory {
+    override fun newImageLoader(context: Context): ImageLoader {
+        return ImageLoader.Builder(context)
+            .crossfade(true)
+            .build()
+    }
+}
+'''
+
+참고해서 수정 작업 진행해줘
+
+* 가이드 링크
+https://coil-kt.github.io/coil/getting_started/
+
+----
+
