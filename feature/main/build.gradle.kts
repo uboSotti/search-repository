@@ -23,6 +23,12 @@ android {
     buildFeatures {
         compose = true
     }
+
+    testOptions {
+        unitTests.all {
+            it.useJUnitPlatform()
+        }
+    }
 }
 
 dependencies {
@@ -45,4 +51,13 @@ dependencies {
     implementation(libs.hilt.android)
     implementation(libs.hilt.lifecycle.viewmodel.compose)
     ksp(libs.hilt.compiler)
+
+    // Test
+    testImplementation(libs.bundles.test.unit)
+    testRuntimeOnly(libs.junit.jupiter.engine)
+
+    // Android Test
+    androidTestImplementation(platform(libs.androidx.compose.bom))
+    androidTestImplementation(libs.bundles.test.android)
+    androidTestImplementation(libs.bundles.test.android.compose)
 }
