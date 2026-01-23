@@ -50,6 +50,13 @@ private val SPACER_HEIGHT_DIVIDER = 24.dp
 private val GRID_ROW_SPACING = 12.dp
 private val GRID_COL_SPACING = 12.dp
 
+/**
+ * 메인 화면의 라우트 Composable.
+ * [MainViewModel]과 상호작용하여 UI 상태를 관리하고 [MainScreen]을 표시합니다.
+ *
+ * @param viewModel 메인 화면의 [MainViewModel].
+ * @param onProductClick 상품 아이템 클릭 시 호출되는 람다.
+ */
 @Composable
 fun MainRoute(
     viewModel: MainViewModel = hiltViewModel(),
@@ -58,6 +65,7 @@ fun MainRoute(
     val pagingItems = viewModel.pagingDataFlow.collectAsLazyPagingItems()
     val favoriteProductIds by viewModel.favoriteProductIds.collectAsStateWithLifecycle()
 
+    // viewModel의 함수를 remember로 감싸 불필요한 리컴포지션을 방지합니다.
     val toggleFavorite = remember(viewModel) { viewModel::toggleFavorite }
 
     MainScreen(
@@ -68,6 +76,15 @@ fun MainRoute(
     )
 }
 
+/**
+ * 메인 화면의 UI를 구성하는 Composable.
+ * 섹션 및 상품 목록을 페이징하여 표시하고, 새로고침 기능을 제공합니다.
+ *
+ * @param pagingItems 페이징된 섹션 UI 모델.
+ * @param favoriteProductIds 찜한 상품 ID 집합.
+ * @param onToggleFavorite 상품의 찜하기 상태를 토글할 때 호출되는 람다.
+ * @param onProductClick 상품 아이템 클릭 시 호출되는 람다.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainScreen(
@@ -79,7 +96,7 @@ fun MainScreen(
     Column(modifier = Modifier.fillMaxSize()) {
         TopAppBar(
             title = { Text(text = stringResource(id = R.string.feature_main_app_bar_title)) },
-            windowInsets = WindowInsets()
+            windowInsets = WindowInsets(0.dp) // Edge-to-Edge 처리를 위해 WindowInsets 비활성화
         )
 
         val isRefreshing = pagingItems.loadState.refresh is LoadState.Loading
@@ -112,6 +129,7 @@ fun MainScreen(
                 renderLoadStates(pagingItems)
             }
 
+            // 초기 로드 실패 시 에러 화면 표시
             if (pagingItems.loadState.refresh is LoadState.Error && pagingItems.itemCount == 0) {
                 ErrorView(onRetry = { pagingItems.retry() })
             }
@@ -119,6 +137,10 @@ fun MainScreen(
     }
 }
 
+/**
+ * 단일 섹션을 표시하는 Composable.
+ * 섹션의 유형에 따라 다른 콘텐츠를 렌더링합니다.
+ */
 @Composable
 private fun SectionItem(
     sectionModel: SectionUiModel,
@@ -153,12 +175,14 @@ private fun SectionItem(
             )
         }
 
+        // 마지막 아이템이 아닐 경우에만 구분선을 추가합니다.
         if (!isLastItem) {
             SectionDivider()
         }
     }
 }
 
+/** 가로 스크롤 섹션의 콘텐츠를 표시합니다. */
 @Composable
 private fun HorizontalSectionContent(
     products: ImmutableList<ProductUiModel>,
@@ -182,6 +206,7 @@ private fun HorizontalSectionContent(
     }
 }
 
+/** 그리드 섹션의 콘텐츠를 표시합니다. (최대 6개 상품) */
 @Composable
 private fun GridSectionContent(
     products: ImmutableList<ProductUiModel>,
@@ -211,12 +236,14 @@ private fun GridSectionContent(
                         )
                     }
                 }
+                // 그리드 행의 빈 공간을 채우기 위한 Spacer
                 repeat(3 - rowProducts.size) { Spacer(modifier = Modifier.weight(1f)) }
             }
         }
     }
 }
 
+/** 세로 리스트 섹션의 콘텐츠를 표시합니다. */
 @Composable
 private fun VerticalSectionContent(
     products: ImmutableList<ProductUiModel>,
@@ -238,6 +265,7 @@ private fun VerticalSectionContent(
     }
 }
 
+/** 섹션 사이에 표시되는 구분선 Composable. */
 @Composable
 private fun SectionDivider() {
     Column {
@@ -249,6 +277,9 @@ private fun SectionDivider() {
     }
 }
 
+/**
+ * Paging의 LoadState에 따라 로딩, 에러 UI를 렌더링하는 확장 함수.
+ */
 private fun LazyListScope.renderLoadStates(pagingItems: LazyPagingItems<*>) {
     when (pagingItems.loadState.append) {
         is LoadState.Loading -> {
@@ -265,6 +296,7 @@ private fun LazyListScope.renderLoadStates(pagingItems: LazyPagingItems<*>) {
     }
 }
 
+/** 추가 데이터 로딩 시 표시되는 Composable. */
 @Composable
 private fun LoadingItem() {
     Box(
@@ -276,6 +308,7 @@ private fun LoadingItem() {
     }
 }
 
+/** 추가 데이터 로딩 실패 시 표시되는 Composable. */
 @Composable
 private fun ErrorItem(onRetry: () -> Unit) {
     Column(
@@ -284,18 +317,19 @@ private fun ErrorItem(onRetry: () -> Unit) {
             .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text(text = "추가 데이터를 불러오지 못했습니다.", style = MaterialTheme.typography.bodySmall)
-        Button(onClick = onRetry) { Text("재시도") }
+        Text(text = stringResource(R.string.feature_main_load_more_error), style = MaterialTheme.typography.bodySmall)
+        Button(onClick = onRetry) { Text(stringResource(R.string.feature_main_retry)) }
     }
 }
 
+/** 초기 데이터 로딩 실패 시 표시되는 전체 화면 에러 Composable. */
 @Composable
 private fun ErrorView(onRetry: () -> Unit) {
     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Text(text = "데이터를 불러오는 중 오류가 발생했습니다.")
+            Text(text = stringResource(R.string.feature_main_initial_load_error))
             Spacer(modifier = Modifier.height(8.dp))
-            Button(onClick = onRetry) { Text("다시 시도") }
+            Button(onClick = onRetry) { Text(stringResource(R.string.feature_main_retry)) }
         }
     }
 }

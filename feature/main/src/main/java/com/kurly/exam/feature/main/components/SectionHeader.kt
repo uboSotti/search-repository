@@ -11,11 +11,12 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
-// Layout Constants
+/** 가로 방향 패딩 */
 private val PADDING_HORIZONTAL = 16.dp
+/** 세로 방향 패딩 */
 private val PADDING_VERTICAL = 12.dp
 
-// Typography Styles (Global Property with Composable Getter)
+/** 섹션 헤더의 텍스트 스타일 */
 private val SectionHeaderStyle: TextStyle
     @Composable
     get() = MaterialTheme.typography.titleLarge.copy(
@@ -23,6 +24,12 @@ private val SectionHeaderStyle: TextStyle
         fontWeight = FontWeight.Bold
     )
 
+/**
+ * 메인 화면의 각 섹션 헤더를 표시하는 Composable.
+ *
+ * @param title 표시할 섹션의 제목.
+ * @param modifier Composable에 적용할 Modifier.
+ */
 @Composable
 fun SectionHeader(
     title: String,

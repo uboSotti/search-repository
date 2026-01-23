@@ -16,14 +16,22 @@ import kotlinx.serialization.json.Json
 import javax.inject.Inject
 
 /**
- * DataStore를 활용하여 Product 엔티티 전체를 로컬 저장소에 저장하는 FavoriteRepository 구현체입니다.
- * Product 엔티티는 JSON 문자열로 직렬화되어 저장됩니다.
+ * [FavoriteRepository]의 구현체.
+ * DataStore를 사용하여 찜한 상품 목록을 로컬에 저장하고 관리합니다.
+ * 상품 데이터는 전체 [Product] 객체를 JSON 형태로 직렬화하여 저장합니다.
+ *
+ * @param dataStore [Preferences]를 저장하는 DataStore 인스턴스.
+ * @param json 직렬화/역직렬화를 위한 [Json] 인스턴스.
  */
 class FavoriteRepositoryImpl @Inject constructor(
     private val dataStore: DataStore<Preferences>,
     private val json: Json
 ) : FavoriteRepository {
 
+    /**
+     * 찜한 모든 상품의 목록을 [Flow]로 반환합니다.
+     * DataStore에 저장된 JSON 문자열을 [Product] 객체 리스트로 역직렬화합니다.
+     */
     override fun getFavoriteProducts(): Flow<List<Product>> {
         return dataStore.data
             .map { preferences ->
@@ -39,6 +47,9 @@ class FavoriteRepositoryImpl @Inject constructor(
             .map { it.values.toList() }
     }
 
+    /**
+     * 찜한 모든 상품의 ID를 [Set] 형태로 [Flow]로 반환합니다.
+     */
     override fun getFavoriteIds(): Flow<Set<Int>> {
         return dataStore.data
             .map { preferences ->
@@ -53,6 +64,12 @@ class FavoriteRepositoryImpl @Inject constructor(
             }
     }
 
+    /**
+     * 상품의 찜 상태를 토글합니다.
+     * 상품이 이미 찜 목록에 있으면 제거하고, 없으면 추가합니다.
+     *
+     * @param product 찜 상태를 변경할 [Product] 객체.
+     */
     override suspend fun toggleFavorite(product: Product) {
         dataStore.edit { preferences ->
             val currentJson = preferences[FAVORITE_PRODUCTS_KEY] ?: "null"
@@ -76,7 +93,10 @@ class FavoriteRepositoryImpl @Inject constructor(
     }
 
     companion object {
+        /** DataStore에 찜한 상품 목록을 저장하기 위한 키 */
         private val FAVORITE_PRODUCTS_KEY = stringPreferencesKey("favorite_products_map")
+
+        /** [Map<Int, Product>] 형태의 데이터를 직렬화/역직렬화하기 위한 Serializer */
         private val ProductMapSerializer: KSerializer<Map<Int, Product>> =
             MapSerializer(Int.serializer(), Product.serializer())
     }

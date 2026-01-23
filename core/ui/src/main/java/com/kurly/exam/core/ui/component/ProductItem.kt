@@ -34,14 +34,15 @@ import com.kurly.exam.core.ui.model.ProductUiModel
 import com.kurly.exam.core.ui.theme.DiscountRed
 
 /**
- * 상품 정보를 표시하는 UI 컴포넌트
+ * 상품 정보를 표시하는 UI 컴포넌트입니다.
+ * 상품의 이미지, 이름, 가격 정보 및 찜하기 상태를 표시하며, 다양한 디스플레이 스타일에 따라 레이아웃이 변경됩니다.
  *
- * @param modifier Composable에 적용할 Modifier
- * @param product 표시할 상품 데이터 모델
- * @param isFavorite 현재 상품의 찜하기 상태
- * @param displayStyle 상품의 표시 스타일 (VERTICAL, HORIZONTAL, GRID)
- * @param onWishClick 찜하기 버튼 클릭 시 호출되는 람다
- * @param onProductClick 상품 영역 클릭 시 호출되는 람다
+ * @param modifier Composable에 적용할 Modifier.
+ * @param product 표시할 상품의 데이터 모델 ([ProductUiModel]).
+ * @param isFavorite 현재 상품의 찜하기 상태.
+ * @param displayStyle 상품 표시 스타일 ([ProductDisplayStyle]).
+ * @param onWishClick 찜하기 버튼 클릭 시 호출되는 람다.
+ * @param onProductClick 상품 아이템 클릭 시 호출되는 람다.
  */
 @Composable
 fun ProductItem(
@@ -52,7 +53,6 @@ fun ProductItem(
     onWishClick: () -> Unit,
     onProductClick: () -> Unit,
 ) {
-    // ui 레이어 내에서 리소스를 직접 참조하도록 수정
     val wishIconOnId = R.drawable.ic_btn_heart_on
     val wishIconOffId = R.drawable.ic_btn_heart_off
 
@@ -63,8 +63,8 @@ fun ProductItem(
     Column(
         modifier = modifier
             .width(
-                if (displayStyle == ProductDisplayStyle.HORIZONTAL) WIDTH_HORIZONTAL_ITEM else Modifier.fillMaxWidth()
-                    .run { Float.NaN.dp })
+                if (displayStyle == ProductDisplayStyle.HORIZONTAL) WIDTH_HORIZONTAL_ITEM else Modifier.fillMaxWidth().run { Float.NaN.dp }
+            )
             .clickable(onClick = onProductClick)
     ) {
         Box(
@@ -88,7 +88,7 @@ fun ProductItem(
             ) {
                 Icon(
                     painter = painterResource(id = if (isFavorite) wishIconOnId else wishIconOffId),
-                    contentDescription = null,
+                    contentDescription = stringResource(R.string.wish_button_content_description),
                     tint = Color.Unspecified
                 )
             }
@@ -119,6 +119,10 @@ fun ProductItem(
     }
 }
 
+/**
+ * 가격 정보를 표시하는 내부 컴포저블.
+ * 할인 여부와 표시 스타일에 따라 다른 레이아웃을 보여줍니다.
+ */
 @Composable
 private fun PriceSection(
     originalPrice: Int,
@@ -127,7 +131,6 @@ private fun PriceSection(
     isVertical: Boolean,
     modifier: Modifier = Modifier
 ) {
-    // ui 레이어 내에서 리소스를 직접 참조하도록 수정
     val priceFormatId = R.string.ui_price_format
     val discountRateFormatId = R.string.ui_discount_rate_format
 
@@ -163,11 +166,15 @@ private fun PriceSection(
     }
 }
 
-
-// Enum class for display style
+/**
+ * 상품 아이템의 표시 스타일을 정의하는 열거형 클래스.
+ */
 enum class ProductDisplayStyle {
+    /** 세로 리스트 스타일 */
     VERTICAL,
+    /** 가로 리스트 스타일 */
     HORIZONTAL,
+    /** 그리드 스타일 */
     GRID
 }
 

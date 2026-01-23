@@ -15,12 +15,14 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 
+/** 다크 테마에 사용될 색상표 */
 private val DarkColorScheme = darkColorScheme(
     primary = Purple80,
     secondary = PurpleGrey80,
     tertiary = Pink80
 )
 
+/** 라이트 테마에 사용될 색상표 */
 private val LightColorScheme = lightColorScheme(
     primary = Purple40,
     secondary = PurpleGrey40,
@@ -37,6 +39,14 @@ private val LightColorScheme = lightColorScheme(
     */
 )
 
+/**
+ * 앱의 전체 테마를 정의하는 Composable 함수.
+ * 시스템 설정(다크 모드)과 Android 12+의 다이나믹 컬러를 지원합니다.
+ *
+ * @param darkTheme 시스템이 다크 모드일 때 true.
+ * @param dynamicColor Android 12+에서 다이나믹 컬러를 사용할지 여부.
+ * @param content 테마를 적용할 Composable 컨텐츠.
+ */
 @Composable
 fun KurlyExamTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),

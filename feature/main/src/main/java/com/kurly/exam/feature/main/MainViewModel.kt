@@ -24,6 +24,14 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+/**
+ * 메인 화면의 섹션 UI를 나타내는 데이터 클래스.
+ *
+ * @property sectionId 섹션의 고유 식별자.
+ * @property title 섹션의 제목.
+ * @property type 섹션의 유형 (e.g., "horizontal", "grid", "vertical").
+ * @property products 섹션에 포함된 상품 목록.
+ */
 @Immutable
 data class SectionUiModel(
     val sectionId: Int,
@@ -32,6 +40,14 @@ data class SectionUiModel(
     val products: ImmutableList<ProductUiModel>
 )
 
+/**
+ * 메인 화면의 ViewModel.
+ * 페이징된 섹션 데이터를 로드하고, 찜하기 상태를 관리합니다.
+ *
+ * @param getSectionsPagedUseCase 페이징된 섹션 데이터를 가져오는 유즈케이스.
+ * @param observeFavoriteProductIdsUseCase 찜한 상품 ID 목록을 관찰하는 유즈케이스.
+ * @param toggleFavoriteUseCase 상품의 찜 상태를 토글하는 유즈케이스.
+ */
 @HiltViewModel
 class MainViewModel @Inject constructor(
     getSectionsPagedUseCase: GetSectionsPagedUseCase,
@@ -39,6 +55,10 @@ class MainViewModel @Inject constructor(
     private val toggleFavoriteUseCase: ToggleFavoriteUseCase
 ) : ViewModel() {
 
+    /**
+     * 페이징된 섹션 데이터를 UI 모델로 변환하여 [Flow]로 제공합니다.
+     * 데이터는 [viewModelScope] 내에서 캐시됩니다.
+     */
     val pagingDataFlow: Flow<PagingData<SectionUiModel>> = getSectionsPagedUseCase()
         .map { pagingData ->
             pagingData.map { domainModel ->
@@ -52,6 +72,10 @@ class MainViewModel @Inject constructor(
         }
         .cachedIn(viewModelScope)
 
+    /**
+     * 찜한 상품 ID 목록을 [StateFlow]로 제공합니다.
+     * UI가 구독하는 동안 활성화되며, 5초의 타임아웃을 가집니다.
+     */
     val favoriteProductIds: StateFlow<ImmutableSet<Int>> = observeFavoriteProductIdsUseCase()
         .map { it.toImmutableSet() }
         .stateIn(
@@ -60,12 +84,20 @@ class MainViewModel @Inject constructor(
             initialValue = kotlinx.collections.immutable.persistentSetOf()
         )
 
+    /**
+     * 상품의 찜 상태를 토글합니다.
+     *
+     * @param productUiModel 찜 상태를 변경할 상품의 UI 모델.
+     */
     fun toggleFavorite(productUiModel: ProductUiModel) {
         viewModelScope.launch {
             toggleFavoriteUseCase(productUiModel.toDomain())
         }
     }
 
+    /**
+     * [Product] 도메인 모델을 [ProductUiModel]로 변환합니다.
+     */
     private fun Product.toUiModel(): ProductUiModel {
         return ProductUiModel(
             id = id,
@@ -77,6 +109,9 @@ class MainViewModel @Inject constructor(
         )
     }
 
+    /**
+     * [ProductUiModel]을 [Product] 도메인 모델로 변환합니다.
+     */
     private fun ProductUiModel.toDomain(): Product {
         return Product(
             id = id,

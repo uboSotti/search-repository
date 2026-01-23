@@ -28,6 +28,7 @@ class AndroidApplicationComposeConventionPlugin : Plugin<Project> {
                 
                 add("implementation", libs.findBundle("compose").get())
                 add("implementation", libs.findLibrary("androidx.activity.compose").get())
+                add("implementation", libs.findLibrary("hilt.lifecycle.viewmodel.compose").get())
 
                 add("debugImplementation", libs.findLibrary("androidx.compose.ui.tooling").get())
                 add("androidTestImplementation", libs.findLibrary("androidx.compose.ui.test.junit4").get())

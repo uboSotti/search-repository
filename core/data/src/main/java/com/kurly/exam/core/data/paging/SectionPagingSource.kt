@@ -11,10 +11,18 @@ import kotlinx.coroutines.coroutineScope
 import retrofit2.HttpException
 import java.io.IOException
 
+/**
+ * 섹션 및 관련 상품 목록을 페이징하여 로드하는 [PagingSource] 구현체.
+ *
+ * @param sectionApi 섹션 및 상품 데이터를 가져오기 위한 API 서비스
+ */
 class SectionPagingSource(
     private val sectionApi: SectionApi
 ) : PagingSource<Int, SectionWithProducts>() {
 
+    /**
+     * 새로고침 시 현재 페이지 키를 결정합니다.
+     */
     override fun getRefreshKey(state: PagingState<Int, SectionWithProducts>): Int? {
         return state.anchorPosition?.let { anchorPosition ->
             state.closestPageToPosition(anchorPosition)?.prevKey?.plus(1)
@@ -22,6 +30,15 @@ class SectionPagingSource(
         }
     }
 
+    /**
+     * 지정된 페이지의 데이터를 비동기적으로 로드합니다.
+     * 1. 섹션 목록을 가져옵니다.
+     * 2. 각 섹션에 대한 상품 목록을 병렬로 가져옵니다.
+     * 3. 섹션과 상품 목록을 결합하여 [SectionWithProducts] 리스트를 생성합니다.
+     *
+     * @param params 로드할 페이지의 키 및 크기를 포함하는 파라미터
+     * @return 로드된 데이터 페이지를 나타내는 [LoadResult]
+     */
     override suspend fun load(params: LoadParams<Int>): LoadResult<Int, SectionWithProducts> {
         return try {
             val page = params.key ?: 1

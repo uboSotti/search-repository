@@ -23,8 +23,16 @@ import com.kurly.exam.core.ui.component.ProductDisplayStyle
 import com.kurly.exam.core.ui.component.ProductItem
 import com.kurly.exam.core.ui.model.ProductUiModel
 
+/** 그리드 아이템 간의 간격 */
 private val GRID_SPACING = 16.dp
 
+/**
+ * 찜하기 화면의 라우트 Composable.
+ * [FavoriteViewModel]과 상호작용하여 UI 상태를 관리하고 [FavoriteScreen]을 표시합니다.
+ *
+ * @param viewModel 찜하기 화면의 [FavoriteViewModel].
+ * @param onProductClick 상품 아이템 클릭 시 호출되는 람다.
+ */
 @Composable
 fun FavoriteRoute(
     viewModel: FavoriteViewModel = hiltViewModel(),
@@ -39,6 +47,14 @@ fun FavoriteRoute(
     )
 }
 
+/**
+ * 찜하기 화면의 UI를 구성하는 Composable.
+ * 찜한 상품 목록을 그리드 형태로 표시합니다.
+ *
+ * @param favoriteProducts 표시할 찜한 상품 목록.
+ * @param onToggleFavorite 상품의 찜하기 상태를 토글할 때 호출되는 람다.
+ * @param onProductClick 상품 아이템 클릭 시 호출되는 람다.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun FavoriteScreen(
@@ -49,10 +65,11 @@ private fun FavoriteScreen(
     Column(modifier = Modifier.fillMaxSize()) {
         TopAppBar(
             title = { Text(text = stringResource(id = R.string.feature_favorite_app_bar_title)) },
-            windowInsets = WindowInsets()
+            windowInsets = WindowInsets(0.dp) // Edge-to-Edge 처리를 위해 WindowInsets 비활성화
         )
-        
+
         if (favoriteProducts.isEmpty()) {
+            // 찜한 상품이 없을 때 표시할 화면
             Column(
                 modifier = Modifier.fillMaxSize(),
                 verticalArrangement = Arrangement.Center,
@@ -63,6 +80,7 @@ private fun FavoriteScreen(
                 )
             }
         } else {
+            // 찜한 상품 목록을 3열 그리드로 표시
             LazyVerticalGrid(
                 columns = GridCells.Fixed(3),
                 modifier = Modifier.fillMaxSize(),
@@ -73,7 +91,7 @@ private fun FavoriteScreen(
                 items(items = favoriteProducts, key = { it.id }) { product ->
                     ProductItem(
                         product = product,
-                        isFavorite = true,
+                        isFavorite = true, // 찜하기 화면에서는 항상 true
                         displayStyle = ProductDisplayStyle.GRID,
                         onWishClick = { onToggleFavorite(product) },
                         onProductClick = { onProductClick(product) },

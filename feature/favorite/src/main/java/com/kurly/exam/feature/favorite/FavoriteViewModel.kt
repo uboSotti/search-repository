@@ -16,12 +16,23 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+/**
+ * 찜하기 화면의 ViewModel.
+ * 찜한 상품 목록을 관찰하고, 찜하기 상태를 변경하는 비즈니스 로직을 처리합니다.
+ *
+ * @param observeFavoriteProductsUseCase 찜한 상품 목록을 관찰하는 유즈케이스.
+ * @param toggleFavoriteUseCase 상품의 찜 상태를 토글하는 유즈케이스.
+ */
 @HiltViewModel
 class FavoriteViewModel @Inject constructor(
     observeFavoriteProductsUseCase: ObserveFavoriteProductsUseCase,
     private val toggleFavoriteUseCase: ToggleFavoriteUseCase
 ) : ViewModel() {
 
+    /**
+     * 찜한 상품 목록을 UI 모델([ProductUiModel])의 리스트로 변환하여 [StateFlow]로 제공합니다.
+     * 이 Flow는 UI가 구독하는 동안 활성화되며, 5초의 타임아웃을 가집니다.
+     */
     val favoriteProducts: StateFlow<ImmutableList<ProductUiModel>> =
         observeFavoriteProductsUseCase()
             .map { products -> products.map { it.toUiModel() }.toImmutableList() }
@@ -31,12 +42,20 @@ class FavoriteViewModel @Inject constructor(
                 initialValue = kotlinx.collections.immutable.persistentListOf()
             )
 
+    /**
+     * 상품의 찜 상태를 토글합니다.
+     *
+     * @param productUiModel 찜 상태를 변경할 상품의 UI 모델.
+     */
     fun toggleFavorite(productUiModel: ProductUiModel) {
         viewModelScope.launch {
             toggleFavoriteUseCase(productUiModel.toDomain())
         }
     }
 
+    /**
+     * [Product] 도메인 모델을 [ProductUiModel]로 변환합니다.
+     */
     private fun Product.toUiModel(): ProductUiModel {
         return ProductUiModel(
             id = id,
@@ -48,6 +67,9 @@ class FavoriteViewModel @Inject constructor(
         )
     }
 
+    /**
+     * [ProductUiModel]을 [Product] 도메인 모델로 변환합니다.
+     */
     private fun ProductUiModel.toDomain(): Product {
         return Product(
             id = id,
