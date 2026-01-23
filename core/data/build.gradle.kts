@@ -1,28 +1,15 @@
+
 plugins {
-    alias(libs.plugins.android.library)
+    id("kurly.android.library")
+    id("kurly.android.hilt")
     alias(libs.plugins.kotlin.serialization)
-    alias(libs.plugins.hilt)
-    alias(libs.plugins.ksp)
 }
 
 android {
     namespace = "com.kurly.exam.core.data"
-    compileSdk = 36
 
     defaultConfig {
-        minSdk = 26
         testInstrumentationRunner = "com.kurly.exam.core.data.HiltTestRunner"
-    }
-
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
-    }
-
-    testOptions {
-        unitTests.all {
-            it.useJUnitPlatform()
-        }
     }
 }
 
@@ -45,17 +32,8 @@ dependencies {
     // DataStore
     implementation(libs.androidx.datastore.preferences)
 
-    // Hilt
-    implementation(libs.hilt.android)
-    ksp(libs.hilt.compiler)
-
     // Paging
     implementation(libs.androidx.paging.runtime)
-
-    // Test
-    testImplementation(libs.bundles.test.unit)
-    testImplementation(libs.kotlinx.coroutines.test)
-    testRuntimeOnly(libs.junit.jupiter.engine)
 
     // Android Test
     androidTestImplementation(libs.bundles.test.android)

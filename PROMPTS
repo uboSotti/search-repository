@@ -337,3 +337,38 @@ Main 화면에서도 그 부분을 추가로 개발할꺼야. main 을 스크롤
 
 ----
 
+이번에는 앞으로 추가될 모듈들의 빌드 컨벤션을 위한 사전 작업 들을 진행 할꺼야.
+
+GradlePlugin 을 활용한 build.gradle.kts 파일의 표준화 작업이라고 볼수 있지.
+
+현재 모듈들은 대략적으로
+- JVM 모듈
+- AndroidLibrary 모듈
+- UI 가 있는 Feature 모듈
+- App 모듈
+
+이렇게 존재 해
+
+너의 판단으로 공통 묶음을 찾아 컨벤션을 추가로 만들고 prebuild 단에 빌드 로직을 추가하여 컨벤션 플러그인 을 각 빌드 스크립트에 적용해 보자
+
+ -> :build-logic 을 추가 할때 include 가 아니고  includeBuild 을 사용하는 걸로 수정해서 진행하자.
+ -> (중단 후)https://blog.yjyoon.dev/android/2025/03/31/android-gradle-convention/
+
+          https://velog.io/@trasalby/Gradle-Kotlin-%EC%BB%A8%EB%B2%A4%EC%85%98-%ED%94%8C%EB%9F%AC%EA%B7%B8%EC%9D%B8%EC%9D%84-%EC%82%AC%EC%9A%A9%ED%95%9C-%EB%AA%A8%EB%93%88-%EA%B4%80%EB%A6%AC-3-Custom-Plugin-%EC%82%AC%EC%9A%A9%ED%95%98%EA%B8%B0
+
+          GradePlugin 을 전혀 만들줄 모르는거 같아서 두 링크를 가져왔어.
+          참고 해서 전략을 새롭게 작성하고 준비해 보자
+
+ -> 이제 추가로 작업할 것들이야.
+
+    1. 과도한 은닉으로 명시적으로 어떤 플러그인이 설치 되어 있는지 알기 어렵네.
+     - AndroidApplicationCompose
+     - AndroidLibraryCompose
+    와 같은 방식으로 컴포즈를 사용하는 패턴은 분리하여 플러그인을 새로 추가 해주고 각 모듈에 직접 반영해줘
+    유사한 패턴의 항복들이 있다면 증식 해서 진행해줘
+
+    2.  @AndroidCompose.kt  파일을 하나 생성 해뒀어. 플러그인 여기저기에 흩어져 있는 configure 들을 모아서 처리해줘
+    필요에 따라 클래스를 추가 해주고.
+
+----
+
