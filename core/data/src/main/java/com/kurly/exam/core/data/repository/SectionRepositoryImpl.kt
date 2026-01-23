@@ -7,10 +7,10 @@ import com.kurly.exam.core.common.dispatcher.DispatcherProvider
 import com.kurly.exam.core.data.mapper.toDomain
 import com.kurly.exam.core.data.paging.SectionPagingSource
 import com.kurly.exam.core.data.remote.api.SectionApi
-import com.kurly.exam.core.domain.model.Product
-import com.kurly.exam.core.domain.model.Section
 import com.kurly.exam.core.domain.model.SectionWithProducts
 import com.kurly.exam.core.domain.repository.SectionRepository
+import com.kurly.exam.core.model.Product
+import com.kurly.exam.core.model.Section
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.withContext
 import javax.inject.Inject

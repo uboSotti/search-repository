@@ -27,9 +27,11 @@ rootProject.name = "KurlyExam"
 
 include(":app")
 include(":core:common")
+include(":core:model")
 include(":core:data")
 include(":core:domain")
 include(":core:ui")
 include(":core:mockserver")
 include(":feature:main")
+include(":feature:favorite")
 include(":core:network")

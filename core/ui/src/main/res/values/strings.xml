@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="ui_price_format">%,d원</string>
+    <string name="ui_discount_rate_format">%1$d%%</string>
+</resources>

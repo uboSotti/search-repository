@@ -1,3 +1,8 @@
 <resources>
     <string name="app_name">KurlyExam</string>
+
+    <string name="bottom_tab_main">홈</string>
+    <string name="bottom_tab_favorite">찜</string>
+
+    <string name="product_clicked_message">%1$s이 클릭되었습니다.</string>
 </resources>

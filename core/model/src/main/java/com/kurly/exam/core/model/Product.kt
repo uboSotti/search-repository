@@ -1,12 +1,8 @@
-package com.kurly.exam.core.domain.model
+package com.kurly.exam.core.model
 
-data class Section(
-    val title: String,
-    val id: Int,
-    val type: String,
-    val url: String
-)
+import kotlinx.serialization.Serializable
 
+@Serializable
 data class Product(
     val id: Int,
     val name: String,

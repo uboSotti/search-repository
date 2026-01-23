@@ -25,12 +25,12 @@ class SectionPagingSource(
     override suspend fun load(params: LoadParams<Int>): LoadResult<Int, SectionWithProducts> {
         return try {
             val page = params.key ?: 1
-            
+
             coroutineScope {
                 // 1. 섹션 목록 호출
                 val sectionsResponse = sectionApi.getSections(page)
                 val sections = sectionsResponse.data
-                
+
                 // paging 필드가 null일 경우 더 이상 페이지가 없는 것으로 간주
                 val nextPage = sectionsResponse.paging?.nextPage
 
@@ -44,9 +44,9 @@ class SectionPagingSource(
                             // 여기서는 빈 리스트로 처리하여 전체 로딩이 실패하지 않도록 함
                             null
                         }
-                        
+
                         val products = productsResponse?.data?.map { it.toDomain() } ?: emptyList()
-                        
+
                         SectionWithProducts(
                             section = sectionDto.toDomain(),
                             products = products

@@ -1,3 +1,4 @@
+
 [versions]
 # Project
 androidGradlePlugin = "9.0.0"
@@ -16,6 +17,7 @@ activityCompose = "1.12.2"
 composeBom = "2026.01.00"
 datastore = "1.2.0"
 paging = "3.3.6"
+navigation3 = "1.0.0"
 
 # DI (Dependency Injection)
 hilt = "2.59"
@@ -51,11 +53,13 @@ kotlinx-collections-immutable = { group = "org.jetbrains.kotlinx", name = "kotli
 # AndroidX
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 androidx-lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "lifecycleRuntimeKtx" }
+androidx-lifecycle-viewmodel-navigation3 = { group = "androidx.lifecycle", name = "lifecycle-viewmodel-navigation3", version.ref = "lifecycleRuntimeKtx" }
 androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "activityCompose" }
 androidx-datastore-preferences = { group = "androidx.datastore", name = "datastore-preferences", version.ref = "datastore" }
 androidx-paging-runtime = { group = "androidx.paging", name = "paging-runtime", version.ref = "paging" }
 androidx-paging-common = { group = "androidx.paging", name = "paging-common", version.ref = "paging" }
 androidx-paging-compose = { group = "androidx.paging", name = "paging-compose", version.ref = "paging" }
+navigation3-ui = { group = "androidx.navigation3", name = "navigation3-ui", version.ref = "navigation3" }
 
 # AndroidX - Compose
 androidx-compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "composeBom" }
@@ -104,6 +108,12 @@ kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", versi
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 hilt = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
+kurly-android-application = { id = "kurly.android.application" }
+kurly-android-application-compose = { id = "kurly.android.application.compose" }
+kurly-android-library = { id = "kurly.android.library" }
+kurly-android-library-compose = { id = "kurly.android.library.compose" }
+kurly-android-hilt = { id = "kurly.android.hilt" }
+
 
 [bundles]
 compose = ["androidx-compose-ui", "androidx-compose-ui-graphics", "androidx-compose-ui-tooling-preview", "androidx-compose-material3", "androidx-compose-material-icons-core"]

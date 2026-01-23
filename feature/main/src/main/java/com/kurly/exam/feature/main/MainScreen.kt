@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -19,7 +20,6 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
@@ -36,13 +36,13 @@ import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemKey
-import com.kurly.exam.feature.main.components.ProductDisplayStyle
-import com.kurly.exam.feature.main.components.ProductItem
+import com.kurly.exam.core.ui.component.ProductDisplayStyle
+import com.kurly.exam.core.ui.component.ProductItem
+import com.kurly.exam.core.ui.model.ProductUiModel
 import com.kurly.exam.feature.main.components.SectionHeader
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.ImmutableSet
 
-// Layout Constants
 private val SECTION_DIVIDER_THICKNESS = 10.dp
 private val PADDING_HORIZONTAL_DEFAULT = 16.dp
 private val PADDING_BOTTOM_LIST = 20.dp
@@ -73,27 +73,26 @@ fun MainRoute(
 fun MainScreen(
     pagingItems: LazyPagingItems<SectionUiModel>,
     favoriteProductIds: ImmutableSet<Int>,
-    onToggleFavorite: (Int) -> Unit,
+    onToggleFavorite: (ProductUiModel) -> Unit,
     onProductClick: (ProductUiModel) -> Unit
 ) {
-    Scaffold(
-        topBar = {
-            TopAppBar(title = { Text(text = stringResource(id = R.string.feature_main_app_bar_title)) })
-        }) { paddingValues ->
+    Column(modifier = Modifier.fillMaxSize()) {
+        TopAppBar(
+            title = { Text(text = stringResource(id = R.string.feature_main_app_bar_title)) },
+            windowInsets = WindowInsets()
+        )
+
         val isRefreshing = pagingItems.loadState.refresh is LoadState.Loading
 
         PullToRefreshBox(
             isRefreshing = isRefreshing,
             onRefresh = { pagingItems.refresh() },
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
+            modifier = Modifier.fillMaxSize()
         ) {
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
                 contentPadding = PaddingValues(bottom = PADDING_BOTTOM_LIST)
             ) {
-                // 페이징 아이템 렌더링
                 items(
                     count = pagingItems.itemCount,
                     key = pagingItems.itemKey { it.sectionId }) { index ->
@@ -110,11 +109,9 @@ fun MainScreen(
                     }
                 }
 
-                // Append 로딩 및 에러 처리
                 renderLoadStates(pagingItems)
             }
 
-            // 초기 로딩 에러 화면
             if (pagingItems.loadState.refresh is LoadState.Error && pagingItems.itemCount == 0) {
                 ErrorView(onRetry = { pagingItems.retry() })
             }
@@ -126,7 +123,7 @@ fun MainScreen(
 private fun SectionItem(
     sectionModel: SectionUiModel,
     favoriteProductIds: ImmutableSet<Int>,
-    onToggleFavorite: (Int) -> Unit,
+    onToggleFavorite: (ProductUiModel) -> Unit,
     onProductClick: (ProductUiModel) -> Unit,
     isLastItem: Boolean
 ) {
@@ -166,7 +163,7 @@ private fun SectionItem(
 private fun HorizontalSectionContent(
     products: ImmutableList<ProductUiModel>,
     favoriteProductIds: ImmutableSet<Int>,
-    onToggleFavorite: (Int) -> Unit,
+    onToggleFavorite: (ProductUiModel) -> Unit,
     onProductClick: (ProductUiModel) -> Unit
 ) {
     LazyRow(
@@ -178,8 +175,9 @@ private fun HorizontalSectionContent(
                 product = product,
                 isFavorite = favoriteProductIds.contains(product.id),
                 displayStyle = ProductDisplayStyle.HORIZONTAL,
-                onWishClick = { onToggleFavorite(product.id) },
-                onProductClick = { onProductClick(product) })
+                onWishClick = { onToggleFavorite(product) },
+                onProductClick = { onProductClick(product) },
+            )
         }
     }
 }
@@ -188,7 +186,7 @@ private fun HorizontalSectionContent(
 private fun GridSectionContent(
     products: ImmutableList<ProductUiModel>,
     favoriteProductIds: ImmutableSet<Int>,
-    onToggleFavorite: (Int) -> Unit,
+    onToggleFavorite: (ProductUiModel) -> Unit,
     onProductClick: (ProductUiModel) -> Unit
 ) {
     val displayProducts = products.take(6)
@@ -207,9 +205,9 @@ private fun GridSectionContent(
                             product = product,
                             isFavorite = favoriteProductIds.contains(product.id),
                             displayStyle = ProductDisplayStyle.GRID,
-                            onWishClick = { onToggleFavorite(product.id) },
+                            onWishClick = { onToggleFavorite(product) },
                             onProductClick = { onProductClick(product) },
-                            modifier = Modifier.fillMaxWidth()
+                            modifier = Modifier.fillMaxWidth(),
                         )
                     }
                 }
@@ -223,7 +221,7 @@ private fun GridSectionContent(
 private fun VerticalSectionContent(
     products: ImmutableList<ProductUiModel>,
     favoriteProductIds: ImmutableSet<Int>,
-    onToggleFavorite: (Int) -> Unit,
+    onToggleFavorite: (ProductUiModel) -> Unit,
     onProductClick: (ProductUiModel) -> Unit
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -232,9 +230,9 @@ private fun VerticalSectionContent(
                 product = product,
                 isFavorite = favoriteProductIds.contains(product.id),
                 displayStyle = ProductDisplayStyle.VERTICAL,
-                onWishClick = { onToggleFavorite(product.id) },
+                onWishClick = { onToggleFavorite(product) },
                 onProductClick = { onProductClick(product) },
-                modifier = Modifier.padding(horizontal = PADDING_HORIZONTAL_DEFAULT)
+                modifier = Modifier.padding(horizontal = PADDING_HORIZONTAL_DEFAULT),
             )
         }
     }
@@ -251,18 +249,19 @@ private fun SectionDivider() {
     }
 }
 
-// LazyListScope Extensions for LoadState (이는 LazyColumn DSL 내에서 사용되므로 유지 가능)
 private fun LazyListScope.renderLoadStates(pagingItems: LazyPagingItems<*>) {
-    when {
-        pagingItems.loadState.append is LoadState.Loading -> {
+    when (pagingItems.loadState.append) {
+        is LoadState.Loading -> {
             item { LoadingItem() }
         }
 
-        pagingItems.loadState.append is LoadState.Error -> {
+        is LoadState.Error -> {
             item {
                 ErrorItem(onRetry = { pagingItems.retry() })
             }
         }
+
+        is LoadState.NotLoading -> {}
     }
 }
 

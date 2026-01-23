@@ -6,10 +6,11 @@ import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import androidx.paging.map
-import com.kurly.exam.core.domain.model.Product
 import com.kurly.exam.core.domain.usecase.GetSectionsPagedUseCase
 import com.kurly.exam.core.domain.usecase.ObserveFavoriteProductIdsUseCase
 import com.kurly.exam.core.domain.usecase.ToggleFavoriteUseCase
+import com.kurly.exam.core.model.Product
+import com.kurly.exam.core.ui.model.ProductUiModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.ImmutableSet
@@ -22,24 +23,6 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-
-// UI 전용 모델 정의 (Recomposition 최적화를 위해 Immutable 선언)
-@Immutable
-data class ProductUiModel(
-    val id: Int,
-    val name: String,
-    val imageUrl: String,
-    val originalPrice: Int,
-    val discountedPrice: Int?,
-    val isSoldOut: Boolean
-) {
-    val discountRate: Int?
-        get() = if (discountedPrice != null && originalPrice > 0) {
-            ((originalPrice - discountedPrice).toDouble() / originalPrice * 100).toInt()
-        } else {
-            null
-        }
-}
 
 @Immutable
 data class SectionUiModel(
@@ -56,7 +39,6 @@ class MainViewModel @Inject constructor(
     private val toggleFavoriteUseCase: ToggleFavoriteUseCase
 ) : ViewModel() {
 
-    // Paging Data Flow
     val pagingDataFlow: Flow<PagingData<SectionUiModel>> = getSectionsPagedUseCase()
         .map { pagingData ->
             pagingData.map { domainModel ->
@@ -70,7 +52,6 @@ class MainViewModel @Inject constructor(
         }
         .cachedIn(viewModelScope)
 
-    // 찜한 상품 ID 목록
     val favoriteProductIds: StateFlow<ImmutableSet<Int>> = observeFavoriteProductIdsUseCase()
         .map { it.toImmutableSet() }
         .stateIn(
@@ -79,10 +60,9 @@ class MainViewModel @Inject constructor(
             initialValue = kotlinx.collections.immutable.persistentSetOf()
         )
 
-    // 찜하기 토글
-    fun toggleFavorite(productId: Int) {
+    fun toggleFavorite(productUiModel: ProductUiModel) {
         viewModelScope.launch {
-            toggleFavoriteUseCase(productId)
+            toggleFavoriteUseCase(productUiModel.toDomain())
         }
     }
 
@@ -91,6 +71,17 @@ class MainViewModel @Inject constructor(
             id = id,
             name = name,
             imageUrl = image,
+            originalPrice = originalPrice,
+            discountedPrice = discountedPrice,
+            isSoldOut = isSoldOut
+        )
+    }
+
+    private fun ProductUiModel.toDomain(): Product {
+        return Product(
+            id = id,
+            name = name,
+            image = imageUrl,
             originalPrice = originalPrice,
             discountedPrice = discountedPrice,
             isSoldOut = isSoldOut

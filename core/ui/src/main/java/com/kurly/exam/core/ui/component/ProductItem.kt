@@ -1,4 +1,4 @@
-package com.kurly.exam.feature.main.components
+package com.kurly.exam.core.ui.component
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -27,14 +27,144 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
+import com.kurly.exam.core.ui.R
+import com.kurly.exam.core.ui.model.ProductUiModel
 import com.kurly.exam.core.ui.theme.DiscountRed
-import com.kurly.exam.core.ui.theme.KurlyExamTheme
-import com.kurly.exam.feature.main.ProductUiModel
-import com.kurly.exam.feature.main.R
 
+/**
+ * 상품 정보를 표시하는 UI 컴포넌트
+ *
+ * @param modifier Composable에 적용할 Modifier
+ * @param product 표시할 상품 데이터 모델
+ * @param isFavorite 현재 상품의 찜하기 상태
+ * @param displayStyle 상품의 표시 스타일 (VERTICAL, HORIZONTAL, GRID)
+ * @param onWishClick 찜하기 버튼 클릭 시 호출되는 람다
+ * @param onProductClick 상품 영역 클릭 시 호출되는 람다
+ */
+@Composable
+fun ProductItem(
+    modifier: Modifier = Modifier,
+    product: ProductUiModel,
+    isFavorite: Boolean,
+    displayStyle: ProductDisplayStyle,
+    onWishClick: () -> Unit,
+    onProductClick: () -> Unit,
+) {
+    // ui 레이어 내에서 리소스를 직접 참조하도록 수정
+    val wishIconOnId = R.drawable.ic_btn_heart_on
+    val wishIconOffId = R.drawable.ic_btn_heart_off
+
+    val isVertical = displayStyle == ProductDisplayStyle.VERTICAL
+    val imageAspectRatio = if (isVertical) ASPECT_RATIO_VERTICAL else ASPECT_RATIO_DEFAULT
+    val titleMaxLines = if (isVertical) 1 else 2
+
+    Column(
+        modifier = modifier
+            .width(
+                if (displayStyle == ProductDisplayStyle.HORIZONTAL) WIDTH_HORIZONTAL_ITEM else Modifier.fillMaxWidth()
+                    .run { Float.NaN.dp })
+            .clickable(onClick = onProductClick)
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .aspectRatio(imageAspectRatio)
+                .background(MaterialTheme.colorScheme.surfaceVariant)
+        ) {
+            AsyncImage(
+                model = product.imageUrl,
+                contentDescription = product.name,
+                modifier = Modifier.fillMaxSize(),
+                contentScale = ContentScale.Crop,
+            )
+
+            IconButton(
+                onClick = onWishClick,
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .padding(PADDING_SMALL)
+            ) {
+                Icon(
+                    painter = painterResource(id = if (isFavorite) wishIconOnId else wishIconOffId),
+                    contentDescription = null,
+                    tint = Color.Unspecified
+                )
+            }
+        }
+
+        Spacer(modifier = Modifier.height(PADDING_MEDIUM))
+
+        Text(
+            text = product.name,
+            maxLines = titleMaxLines,
+            overflow = TextOverflow.Ellipsis,
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurface,
+            modifier = Modifier.padding(horizontal = PADDING_SMALL)
+        )
+
+        Spacer(modifier = Modifier.height(PADDING_SMALL))
+
+        PriceSection(
+            originalPrice = product.originalPrice,
+            discountedPrice = product.discountedPrice,
+            discountRate = product.discountRate,
+            isVertical = isVertical,
+            modifier = Modifier.padding(horizontal = PADDING_SMALL)
+        )
+
+        Spacer(modifier = Modifier.height(PADDING_LARGE))
+    }
+}
+
+@Composable
+private fun PriceSection(
+    originalPrice: Int,
+    discountedPrice: Int?,
+    discountRate: Int?,
+    isVertical: Boolean,
+    modifier: Modifier = Modifier
+) {
+    // ui 레이어 내에서 리소스를 직접 참조하도록 수정
+    val priceFormatId = R.string.ui_price_format
+    val discountRateFormatId = R.string.ui_discount_rate_format
+
+    if (discountedPrice != null && discountRate != null) {
+        val discountRateText = stringResource(id = discountRateFormatId, discountRate)
+        val discountedPriceText = stringResource(id = priceFormatId, discountedPrice)
+        val originalPriceText = stringResource(id = priceFormatId, originalPrice)
+
+        if (isVertical) {
+            Row(modifier = modifier, verticalAlignment = Alignment.CenterVertically) {
+                Text(text = discountRateText, style = DiscountRateStyle)
+                Spacer(modifier = Modifier.width(PADDING_SMALL))
+                Text(text = discountedPriceText, style = DiscountPriceStyle)
+                Spacer(modifier = Modifier.width(PADDING_SMALL))
+                Text(text = originalPriceText, style = OriginalPriceStyle)
+            }
+        } else {
+            Column(modifier = modifier) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(text = discountRateText, style = DiscountRateStyle)
+                    Spacer(modifier = Modifier.width(PADDING_SMALL))
+                    Text(text = discountedPriceText, style = DiscountPriceStyle)
+                }
+                Text(text = originalPriceText, style = OriginalPriceStyle)
+            }
+        }
+    } else {
+        Text(
+            text = stringResource(id = priceFormatId, originalPrice),
+            style = SinglePriceStyle,
+            modifier = modifier
+        )
+    }
+}
+
+
+// Enum class for display style
 enum class ProductDisplayStyle {
     VERTICAL,
     HORIZONTAL,
@@ -48,10 +178,6 @@ private val WIDTH_HORIZONTAL_ITEM = 150.dp
 private val PADDING_SMALL = 4.dp
 private val PADDING_MEDIUM = 8.dp
 private val PADDING_LARGE = 16.dp
-
-// Resource Constants
-private val ICON_WISH_ON = R.drawable.ic_btn_heart_on
-private val ICON_WISH_OFF = R.drawable.ic_btn_heart_off
 
 // Typography Styles
 private val DiscountRateStyle: TextStyle
@@ -81,136 +207,3 @@ private val SinglePriceStyle: TextStyle
         fontWeight = FontWeight.Bold,
         color = MaterialTheme.colorScheme.onSurface
     )
-
-@Composable
-fun ProductItem(
-    modifier: Modifier = Modifier,
-    product: ProductUiModel,
-    isFavorite: Boolean,
-    displayStyle: ProductDisplayStyle,
-    onWishClick: () -> Unit,
-    onProductClick: () -> Unit
-) {
-    val isVertical = displayStyle == ProductDisplayStyle.VERTICAL
-    val imageAspectRatio = if (isVertical) ASPECT_RATIO_VERTICAL else ASPECT_RATIO_DEFAULT
-    val titleMaxLines = if (isVertical) 1 else 2
-
-    Column(
-        modifier = modifier
-            .width(if (displayStyle == ProductDisplayStyle.HORIZONTAL) WIDTH_HORIZONTAL_ITEM else Modifier.fillMaxWidth().run { Float.NaN.dp })
-            .clickable(onClick = onProductClick)
-    ) {
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .aspectRatio(imageAspectRatio)
-                .background(MaterialTheme.colorScheme.surfaceVariant)
-        ) {
-            AsyncImage(
-                model = product.imageUrl,
-                contentDescription = product.name,
-                modifier = Modifier.fillMaxSize(),
-                contentScale = ContentScale.Crop,
-            )
-
-            IconButton(
-                onClick = onWishClick,
-                modifier = Modifier
-                    .align(Alignment.TopEnd)
-                    .padding(PADDING_SMALL)
-            ) {
-                Icon(
-                    painter = painterResource(id = if (isFavorite) ICON_WISH_ON else ICON_WISH_OFF),
-                    contentDescription = null,
-                    tint = Color.Unspecified
-                )
-            }
-        }
-
-        Spacer(modifier = Modifier.height(PADDING_MEDIUM))
-
-        Text(
-            text = product.name,
-            maxLines = titleMaxLines,
-            overflow = TextOverflow.Ellipsis,
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurface,
-            modifier = Modifier.padding(horizontal = PADDING_SMALL)
-        )
-
-        Spacer(modifier = Modifier.height(PADDING_SMALL))
-
-        PriceSection(
-            originalPrice = product.originalPrice,
-            discountedPrice = product.discountedPrice,
-            discountRate = product.discountRate,
-            isVertical = isVertical,
-            modifier = Modifier.padding(horizontal = PADDING_SMALL)
-        )
-        
-        Spacer(modifier = Modifier.height(PADDING_LARGE))
-    }
-}
-
-@Composable
-private fun PriceSection(
-    originalPrice: Int,
-    discountedPrice: Int?,
-    discountRate: Int?,
-    isVertical: Boolean,
-    modifier: Modifier = Modifier
-) {
-    if (discountedPrice != null && discountRate != null) {
-        val discountRateText = stringResource(id = R.string.feature_main_discount_rate_format, discountRate)
-        val discountedPriceText = stringResource(id = R.string.feature_main_price_format, discountedPrice)
-        val originalPriceText = stringResource(id = R.string.feature_main_price_format, originalPrice)
-
-        if (isVertical) {
-            Row(modifier = modifier, verticalAlignment = Alignment.CenterVertically) {
-                Text(text = discountRateText, style = DiscountRateStyle)
-                Spacer(modifier = Modifier.width(PADDING_SMALL))
-                Text(text = discountedPriceText, style = DiscountPriceStyle)
-                Spacer(modifier = Modifier.width(PADDING_SMALL))
-                Text(text = originalPriceText, style = OriginalPriceStyle)
-            }
-        } else {
-            Column(modifier = modifier) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(text = discountRateText, style = DiscountRateStyle)
-                    Spacer(modifier = Modifier.width(PADDING_SMALL))
-                    Text(text = discountedPriceText, style = DiscountPriceStyle)
-                }
-                Text(text = originalPriceText, style = OriginalPriceStyle)
-            }
-        }
-    } else {
-        Text(
-            text = stringResource(id = R.string.feature_main_price_format, originalPrice),
-            style = SinglePriceStyle,
-            modifier = modifier
-        )
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun ProductItemPreview() {
-    KurlyExamTheme {
-        Row {
-            ProductItem(
-                product = ProductUiModel(
-                    id = 1,
-                    name = "[샐러딩] 레디믹스 스탠다드 150g",
-                    imageUrl = "",
-                    originalPrice = 8000,
-                    discountedPrice = 6200,
-                    isSoldOut = false
-                ),
-                isFavorite = true,
-                displayStyle = ProductDisplayStyle.HORIZONTAL,
-                onWishClick = {},
-                onProductClick = {}
-            )
-        }
-    }
-}

@@ -1,6 +1,8 @@
 plugins {
-    id("kurly.android.application")
-    id("kurly.android.application.compose")
+    alias(libs.plugins.kurly.android.application)
+    alias(libs.plugins.kurly.android.application.compose)
+
+    alias(libs.plugins.kotlin.serialization)
 }
 
 android {
@@ -24,16 +26,16 @@ android {
 }
 
 dependencies {
-    // Project Modules (가나다순)
     implementation(project(":core:common"))
     implementation(project(":core:data"))
     implementation(project(":core:domain"))
     implementation(project(":core:ui"))
+    implementation(project(":feature:favorite"))
     implementation(project(":feature:main"))
 
     // UI
-    implementation(libs.coil.compose)
-    implementation(libs.coil.network.okhttp)
+    implementation(libs.navigation3.ui)
+    implementation(libs.androidx.lifecycle.viewmodel.navigation3)
 
     // Test
     testImplementation(libs.junit)

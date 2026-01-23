@@ -4,14 +4,6 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class SectionsResponse(
-    @SerialName("data")
-    val data: List<SectionDto>,
-    @SerialName("paging")
-    val paging: PagingDto? = null
-)
-
-@Serializable
 data class SectionDto(
     @SerialName("title")
     val title: String,

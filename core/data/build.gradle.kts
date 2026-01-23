@@ -1,7 +1,7 @@
 
 plugins {
-    id("kurly.android.library")
-    id("kurly.android.hilt")
+    alias(libs.plugins.kurly.android.library)
+    alias(libs.plugins.kurly.android.hilt)
     alias(libs.plugins.kotlin.serialization)
 }
 
@@ -13,15 +13,10 @@ android {
     }
 }
 
-kotlin {
-    compilerOptions {
-        freeCompilerArgs.add("-opt-in=kotlinx.serialization.InternalSerializationApi")
-    }
-}
-
 dependencies {
     // Project Modules
     implementation(project(":core:common"))
+    implementation(project(":core:model"))
     implementation(project(":core:domain"))
     implementation(project(":core:network"))
 

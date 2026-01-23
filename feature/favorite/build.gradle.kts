@@ -4,19 +4,15 @@ plugins {
 }
 
 android {
-    namespace = "com.kurly.exam.feature.main"
+    namespace = "com.kurly.exam.feature.favorite"
 }
 
 dependencies {
-    // Project Modules (가나다순)
     implementation(project(":core:common"))
     implementation(project(":core:domain"))
     implementation(project(":core:model"))
     implementation(project(":core:ui"))
 
-    // Paging
-    implementation(libs.androidx.paging.compose)
-
-    // Android Test (Compose는 Convention에 포함됨)
-    androidTestImplementation(libs.bundles.test.android)
+    // Test
+    testImplementation(libs.bundles.test.unit)
 }

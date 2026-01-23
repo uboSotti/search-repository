@@ -2,8 +2,8 @@ package com.kurly.exam.core.data.mapper
 
 import com.kurly.exam.core.data.remote.dto.ProductDto
 import com.kurly.exam.core.data.remote.dto.SectionDto
-import com.kurly.exam.core.domain.model.Product
-import com.kurly.exam.core.domain.model.Section
+import com.kurly.exam.core.model.Product
+import com.kurly.exam.core.model.Section
 
 fun SectionDto.toDomain(): Section {
     return Section(

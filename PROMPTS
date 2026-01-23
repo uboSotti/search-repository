@@ -372,3 +372,57 @@ GradlePlugin 을 활용한 build.gradle.kts 파일의 표준화 작업이라고 
 
 ----
 
+이번엔 :app 모듈에 App Composable 을 추가 할꺼야.
+
+Jetpack navigation3 를 활용하여 만들고,
+MAIN -> feature:main 모듈이 활용 되도록 추가 할꺼야.
+
+sealed interface Screen {}
+
+#참고 링크
+https://developer.android.com/jetpack/androidx/releases/navigation3#1.0.0
+https://android-developers.googleblog.com/2025/05/announcing-jetpack-navigation-3-for-compose.html
+
+ -> https://developer.android.com/guide/navigation/navigation-3/get-started
+    https://developer.android.com/guide/navigation/navigation-3/basics
+    두 링크를 읽고 앱 네이게이션 정책을 새워봐
+
+----
+
+다음 작업은 앱 하단에 바텀 메뉴바를 만들꺼야.
+
+ @ExamApp.kt  안에서 만들어 나가면되고, 메뉴 구성은 Main 과 Favorite 이야
+
+Main -> MainRoute
+Favorite -> FavoriteRoute
+
+두 메뉴를 누를 때마다 바뀌도록 navigation 정의를 해주면 돼
+메뉴가 바뀔때는 이전 상태를 기억 하도록 해야해
+
+
+그다음 작업은 FavoriteRoute 가 들어 있는 :feature:favorite 모듈을 만들어야해 아래는 해당 모듈의 기능이야
+
+#favortie 화면 정의
+- 2x2 grid 형식
+- Main 에서 찜하기 한 상품이 노출 되어야 한다
+    a. FavoriteRepository 의 데이터를 활용하고.
+    b. FavoriteViewModel 을 생성해서 추가 할것
+- ui  형태는 main 의 Product 와 공유 할것.
+
+# 기능 정의
+- 찜하기를 해제 할 수 있으며 해제하면 바로 리스트에서 사라져야함
+
+
+이제 전략을 세워봐
+
+  -> 1. Main 모듈에서 찜하기 수행시
+      -> Product 를 로컬에 저장 ( FavoriteRepository )
+
+     2. Favorite 모듈에서는 로컬에 저장된 Product 를 활용해 리스트를 보여준다
+
+     3.  @FavoriteRepositoryImpl.kt  에서 로컬에 저장할때는 dataStore 를 활용해 저장하도록 구현해줘
+
+     로 전략을 수정할게
+----
+
+ @ExamApp.kt  파일에서 Scaffold 가 하위 컴포저블에 topBar 영역을 양보하도록 수정해줘

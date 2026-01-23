@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="feature_favorite_app_bar_title">찜한 상품</string>
+    <string name="feature_favorite_empty_list">찜한 상품이 없습니다.</string>
+    <string name="feature_favorite_price_format">%d원</string>
+    <string name="feature_favorite_discount_rate_format">%d%%</string>
+</resources>

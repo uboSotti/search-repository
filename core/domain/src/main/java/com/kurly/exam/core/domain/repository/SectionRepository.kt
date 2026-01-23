@@ -1,9 +1,9 @@
 package com.kurly.exam.core.domain.repository
 
 import androidx.paging.PagingData
-import com.kurly.exam.core.domain.model.Product
-import com.kurly.exam.core.domain.model.Section
 import com.kurly.exam.core.domain.model.SectionWithProducts
+import com.kurly.exam.core.model.Product
+import com.kurly.exam.core.model.Section
 import kotlinx.coroutines.flow.Flow
 
 interface SectionRepository {
