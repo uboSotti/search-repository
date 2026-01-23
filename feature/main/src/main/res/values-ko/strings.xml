@@ -1,5 +1,10 @@
 <resources>
     <string name="feature_main_app_bar_title">컬리 과제</string>
+
     <string name="feature_main_price_format">%,d원</string>
     <string name="feature_main_discount_rate_format">%1$d%%</string>
+
+    <string name="feature_main_load_more_error">정보를 불러오는데 실패했습니다.</string>
+    <string name="feature_main_retry">재시도</string>
+    <string name="feature_main_initial_load_error">초기 정보를 불러오는데 실패했습니다. 네트워크 상태를 확인 후 다시 시도해주세요.</string>
 </resources>

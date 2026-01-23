@@ -63,7 +63,8 @@ fun ProductItem(
     Column(
         modifier = modifier
             .width(
-                if (displayStyle == ProductDisplayStyle.HORIZONTAL) WIDTH_HORIZONTAL_ITEM else Modifier.fillMaxWidth().run { Float.NaN.dp }
+                if (displayStyle == ProductDisplayStyle.HORIZONTAL) WIDTH_HORIZONTAL_ITEM else Modifier.fillMaxWidth()
+                    .run { Float.NaN.dp }
             )
             .clickable(onClick = onProductClick)
     ) {
@@ -88,7 +89,7 @@ fun ProductItem(
             ) {
                 Icon(
                     painter = painterResource(id = if (isFavorite) wishIconOnId else wishIconOffId),
-                    contentDescription = stringResource(R.string.wish_button_content_description),
+                    contentDescription = null,
                     tint = Color.Unspecified
                 )
             }
@@ -172,8 +173,10 @@ private fun PriceSection(
 enum class ProductDisplayStyle {
     /** 세로 리스트 스타일 */
     VERTICAL,
+
     /** 가로 리스트 스타일 */
     HORIZONTAL,
+
     /** 그리드 스타일 */
     GRID
 }
