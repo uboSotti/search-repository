@@ -47,6 +47,9 @@ dependencies {
     implementation(libs.bundles.compose)
     implementation(libs.coil.compose)
     implementation(libs.coil.network.okhttp)
+    
+    // Paging
+    implementation(libs.androidx.paging.compose)
 
     // Hilt
     implementation(libs.hilt.android)

@@ -28,7 +28,11 @@ android {
 
 dependencies {
     implementation(libs.javax.inject)
+    
+    // Paging
+    implementation(libs.androidx.paging.common)
 
+    // Test
     testImplementation(libs.bundles.test.unit)
     testRuntimeOnly(libs.junit.jupiter.engine)
 }

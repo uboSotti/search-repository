@@ -8,7 +8,7 @@ data class SectionsResponse(
     @SerialName("data")
     val data: List<SectionDto>,
     @SerialName("paging")
-    val paging: PagingDto
+    val paging: PagingDto? = null
 )
 
 @Serializable

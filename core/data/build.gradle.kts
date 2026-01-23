@@ -1,20 +1,14 @@
 plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.serialization)
-    alias(libs.plugins.ksp)
     alias(libs.plugins.hilt)
+    alias(libs.plugins.ksp)
 }
 
 android {
     namespace = "com.kurly.exam.core.data"
     compileSdk {
         version = release(36)
-    }
-
-    sourceSets {
-        getByName("main") {
-            java.srcDirs("build/generated/ksp/main/kotlin")
-        }
     }
 
     defaultConfig {
@@ -35,7 +29,7 @@ android {
 }
 
 dependencies {
-    // Project Modules (가나다순)
+    // Project Modules
     implementation(project(":core:common"))
     implementation(project(":core:domain"))
     implementation(project(":core:network"))
@@ -47,6 +41,9 @@ dependencies {
     // Hilt
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)
+    
+    // Paging
+    implementation(libs.androidx.paging.runtime)
 
     // Test
     testImplementation(libs.bundles.test.unit)

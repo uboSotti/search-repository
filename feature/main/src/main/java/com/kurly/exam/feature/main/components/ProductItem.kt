@@ -53,7 +53,7 @@ private val PADDING_LARGE = 16.dp
 private val ICON_WISH_ON = R.drawable.ic_btn_heart_on
 private val ICON_WISH_OFF = R.drawable.ic_btn_heart_off
 
-// Typography Styles (Global Property with Composable Getter)
+// Typography Styles
 private val DiscountRateStyle: TextStyle
     @Composable
     get() = MaterialTheme.typography.titleMedium.copy(
@@ -86,6 +86,7 @@ private val SinglePriceStyle: TextStyle
 fun ProductItem(
     modifier: Modifier = Modifier,
     product: ProductUiModel,
+    isFavorite: Boolean,
     displayStyle: ProductDisplayStyle,
     onWishClick: () -> Unit,
     onProductClick: () -> Unit
@@ -119,7 +120,7 @@ fun ProductItem(
                     .padding(PADDING_SMALL)
             ) {
                 Icon(
-                    painter = painterResource(id = if (product.isFavorite) ICON_WISH_ON else ICON_WISH_OFF),
+                    painter = painterResource(id = if (isFavorite) ICON_WISH_ON else ICON_WISH_OFF),
                     contentDescription = null,
                     tint = Color.Unspecified
                 )
@@ -203,9 +204,9 @@ private fun ProductItemPreview() {
                     imageUrl = "",
                     originalPrice = 8000,
                     discountedPrice = 6200,
-                    isSoldOut = false,
-                    isFavorite = true
+                    isSoldOut = false
                 ),
+                isFavorite = true,
                 displayStyle = ProductDisplayStyle.HORIZONTAL,
                 onWishClick = {},
                 onProductClick = {}

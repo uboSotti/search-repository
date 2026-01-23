@@ -1,12 +1,17 @@
 package com.kurly.exam.core.data.repository
 
+import androidx.paging.Pager
+import androidx.paging.PagingConfig
+import androidx.paging.PagingData
 import com.kurly.exam.core.common.dispatcher.DispatcherProvider
+import com.kurly.exam.core.data.mapper.toDomain
+import com.kurly.exam.core.data.paging.SectionPagingSource
 import com.kurly.exam.core.data.remote.api.SectionApi
-import com.kurly.exam.core.data.remote.dto.ProductDto
-import com.kurly.exam.core.data.remote.dto.SectionDto
 import com.kurly.exam.core.domain.model.Product
 import com.kurly.exam.core.domain.model.Section
+import com.kurly.exam.core.domain.model.SectionWithProducts
 import com.kurly.exam.core.domain.repository.SectionRepository
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
@@ -28,21 +33,14 @@ class SectionRepositoryImpl @Inject constructor(
                 sectionApi.getSectionProducts(sectionId).data.map { it.toDomain() }
             }
         }
+
+    override fun getSectionWithProductsPaged(): Flow<PagingData<SectionWithProducts>> {
+        return Pager(
+            config = PagingConfig(
+                pageSize = 10, // 페이지 크기는 API 특성에 맞게 조정 (임의 설정)
+                enablePlaceholders = false
+            ),
+            pagingSourceFactory = { SectionPagingSource(sectionApi) }
+        ).flow
+    }
 }
-
-// Mapper functions
-fun SectionDto.toDomain(): Section = Section(
-    title = title,
-    id = id,
-    type = type,
-    url = url
-)
-
-fun ProductDto.toDomain(): Product = Product(
-    id = id,
-    name = name,
-    image = image,
-    originalPrice = originalPrice,
-    discountedPrice = discountedPrice,
-    isSoldOut = isSoldOut
-)
