@@ -29,7 +29,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.paging.LoadState
@@ -39,16 +38,21 @@ import androidx.paging.compose.itemKey
 import com.kurly.exam.core.ui.component.ProductDisplayStyle
 import com.kurly.exam.core.ui.component.ProductItem
 import com.kurly.exam.core.ui.model.ProductUiModel
+import com.kurly.exam.core.ui.theme.Dimen
 import com.kurly.exam.feature.main.components.SectionHeader
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.ImmutableSet
 
-private val SECTION_DIVIDER_THICKNESS = 10.dp
-private val PADDING_HORIZONTAL_DEFAULT = 16.dp
-private val PADDING_BOTTOM_LIST = 20.dp
-private val SPACER_HEIGHT_DIVIDER = 24.dp
-private val GRID_ROW_SPACING = 12.dp
-private val GRID_COL_SPACING = 12.dp
+private object MainConstants {
+    val SECTION_DIVIDER_THICKNESS = Dimen.Padding.ExtraMedium
+    val PADDING_HORIZONTAL_DEFAULT = Dimen.Padding.Large
+    val PADDING_BOTTOM_LIST = Dimen.Padding.ExtraLarge
+    val SPACER_HEIGHT_DIVIDER = Dimen.Padding.ExtraLarge
+    val GRID_ROW_SPACING = Dimen.Margin.ExtraMedium
+    val GRID_COL_SPACING = Dimen.Margin.ExtraMedium
+    const val GRID_CHUNK_SIZE = 3
+    const val GRID_MAX_ITEMS = 6
+}
 
 /**
  * 메인 화면의 라우트 Composable.
@@ -96,7 +100,7 @@ fun MainScreen(
     Column(modifier = Modifier.fillMaxSize()) {
         TopAppBar(
             title = { Text(text = stringResource(id = R.string.feature_main_app_bar_title)) },
-            windowInsets = WindowInsets(0.dp) // Edge-to-Edge 처리를 위해 WindowInsets 비활성화
+            windowInsets = WindowInsets(Dimen.Radius.None) // Edge-to-Edge 처리를 위해 WindowInsets 비활성화
         )
 
         val isRefreshing = pagingItems.loadState.refresh is LoadState.Loading
@@ -108,7 +112,7 @@ fun MainScreen(
         ) {
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
-                contentPadding = PaddingValues(bottom = PADDING_BOTTOM_LIST)
+                contentPadding = PaddingValues(bottom = MainConstants.PADDING_BOTTOM_LIST)
             ) {
                 items(
                     count = pagingItems.itemCount,
@@ -191,8 +195,8 @@ private fun HorizontalSectionContent(
     onProductClick: (ProductUiModel) -> Unit
 ) {
     LazyRow(
-        contentPadding = PaddingValues(horizontal = PADDING_HORIZONTAL_DEFAULT),
-        horizontalArrangement = Arrangement.spacedBy(12.dp)
+        contentPadding = PaddingValues(horizontal = MainConstants.PADDING_HORIZONTAL_DEFAULT),
+        horizontalArrangement = Arrangement.spacedBy(MainConstants.GRID_ROW_SPACING)
     ) {
         items(items = products, key = { it.id }) { product ->
             ProductItem(
@@ -214,15 +218,15 @@ private fun GridSectionContent(
     onToggleFavorite: (ProductUiModel) -> Unit,
     onProductClick: (ProductUiModel) -> Unit
 ) {
-    val displayProducts = products.take(6)
+    val displayProducts = products.take(MainConstants.GRID_MAX_ITEMS)
     Column(
-        modifier = Modifier.padding(horizontal = PADDING_HORIZONTAL_DEFAULT),
-        verticalArrangement = Arrangement.spacedBy(GRID_COL_SPACING)
+        modifier = Modifier.padding(horizontal = MainConstants.PADDING_HORIZONTAL_DEFAULT),
+        verticalArrangement = Arrangement.spacedBy(MainConstants.GRID_COL_SPACING)
     ) {
-        displayProducts.chunked(3).forEach { rowProducts ->
+        displayProducts.chunked(MainConstants.GRID_CHUNK_SIZE).forEach { rowProducts ->
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(GRID_ROW_SPACING)
+                horizontalArrangement = Arrangement.spacedBy(MainConstants.GRID_ROW_SPACING)
             ) {
                 rowProducts.forEach { product ->
                     Box(modifier = Modifier.weight(1f)) {
@@ -237,7 +241,7 @@ private fun GridSectionContent(
                     }
                 }
                 // 그리드 행의 빈 공간을 채우기 위한 Spacer
-                repeat(3 - rowProducts.size) { Spacer(modifier = Modifier.weight(1f)) }
+                repeat(MainConstants.GRID_CHUNK_SIZE - rowProducts.size) { Spacer(modifier = Modifier.weight(1f)) }
             }
         }
     }
@@ -251,7 +255,7 @@ private fun VerticalSectionContent(
     onToggleFavorite: (ProductUiModel) -> Unit,
     onProductClick: (ProductUiModel) -> Unit
 ) {
-    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+    Column(verticalArrangement = Arrangement.spacedBy(Dimen.Margin.ExtraMedium)) {
         products.forEach { product ->
             ProductItem(
                 product = product,
@@ -259,7 +263,7 @@ private fun VerticalSectionContent(
                 displayStyle = ProductDisplayStyle.VERTICAL,
                 onWishClick = { onToggleFavorite(product) },
                 onProductClick = { onProductClick(product) },
-                modifier = Modifier.padding(horizontal = PADDING_HORIZONTAL_DEFAULT),
+                modifier = Modifier.padding(horizontal = MainConstants.PADDING_HORIZONTAL_DEFAULT),
             )
         }
     }
@@ -269,9 +273,9 @@ private fun VerticalSectionContent(
 @Composable
 private fun SectionDivider() {
     Column {
-        Spacer(modifier = Modifier.height(SPACER_HEIGHT_DIVIDER))
+        Spacer(modifier = Modifier.height(MainConstants.SPACER_HEIGHT_DIVIDER))
         HorizontalDivider(
-            thickness = SECTION_DIVIDER_THICKNESS,
+            thickness = MainConstants.SECTION_DIVIDER_THICKNESS,
             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f)
         )
     }
@@ -302,7 +306,7 @@ private fun LoadingItem() {
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(16.dp), contentAlignment = Alignment.Center
+            .padding(Dimen.Padding.Large), contentAlignment = Alignment.Center
     ) {
         CircularProgressIndicator()
     }
@@ -314,7 +318,7 @@ private fun ErrorItem(onRetry: () -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(16.dp),
+            .padding(Dimen.Padding.Large),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(text = stringResource(R.string.feature_main_load_more_error), style = MaterialTheme.typography.bodySmall)
@@ -328,7 +332,7 @@ private fun ErrorView(onRetry: () -> Unit) {
     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Text(text = stringResource(R.string.feature_main_initial_load_error))
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(Dimen.Padding.Medium))
             Button(onClick = onRetry) { Text(stringResource(R.string.feature_main_retry)) }
         }
     }

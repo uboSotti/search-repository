@@ -17,26 +17,26 @@ import androidx.core.view.WindowCompat
 
 /** 다크 테마에 사용될 색상표 */
 private val DarkColorScheme = darkColorScheme(
-    primary = Purple80,
-    secondary = PurpleGrey80,
-    tertiary = Pink80
+    primary = KurlyPurple,
+    secondary = KurlyPurpleLight,
+    background = KurlyBlack,
+    surface = KurlyBlack,
+    onPrimary = KurlyWhite,
+    onSecondary = KurlyBlack,
+    onBackground = KurlyWhite,
+    onSurface = KurlyWhite,
 )
 
 /** 라이트 테마에 사용될 색상표 */
 private val LightColorScheme = lightColorScheme(
-    primary = Purple40,
-    secondary = PurpleGrey40,
-    tertiary = Pink40
-
-    /* Other default colors to override
-    background = Color(0xFFFFFBFE),
-    surface = Color(0xFFFFFBFE),
-    onPrimary = Color.White,
-    onSecondary = Color.White,
-    onTertiary = Color.White,
-    onBackground = Color(0xFF1C1B1F),
-    onSurface = Color(0xFF1C1B1F),
-    */
+    primary = KurlyPurple,
+    secondary = KurlyPurpleLight,
+    background = KurlyWhite,
+    surface = KurlyWhite,
+    onPrimary = KurlyWhite,
+    onSecondary = KurlyBlack,
+    onBackground = KurlyBlack,
+    onSurface = KurlyBlack,
 )
 
 /**
@@ -51,7 +51,7 @@ private val LightColorScheme = lightColorScheme(
 fun KurlyExamTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     // Dynamic color is available on Android 12+
-    dynamicColor: Boolean = true,
+    dynamicColor: Boolean = false, // Disable dynamic color to use Kurly's brand color
     content: @Composable () -> Unit
 ) {
     val colorScheme = when {
@@ -68,7 +68,7 @@ fun KurlyExamTheme(
         SideEffect {
             val window = (view.context as Activity).window
             window.statusBarColor = colorScheme.primary.toArgb()
-            WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = darkTheme
+            WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = !darkTheme
         }
     }
 

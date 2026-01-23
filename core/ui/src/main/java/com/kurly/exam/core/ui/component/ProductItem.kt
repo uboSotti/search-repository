@@ -31,7 +31,50 @@ import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import com.kurly.exam.core.ui.R
 import com.kurly.exam.core.ui.model.ProductUiModel
+import com.kurly.exam.core.ui.theme.Dimen
 import com.kurly.exam.core.ui.theme.DiscountRed
+
+private object ProductItemConstants {
+    object Layout {
+        const val ASPECT_RATIO_VERTICAL = 1.5f
+        const val ASPECT_RATIO_DEFAULT = 0.75f
+        val WIDTH_HORIZONTAL_ITEM = Dimen.Size.ProductItemHorizontalWidth
+        val PADDING_SMALL = Dimen.Padding.Small
+        val PADDING_MEDIUM = Dimen.Padding.Medium
+        val PADDING_LARGE = Dimen.Padding.Large
+    }
+
+    object Style {
+        val DiscountRate: TextStyle
+            @Composable
+            get() = MaterialTheme.typography.titleMedium.copy(
+                fontWeight = FontWeight.Bold,
+                color = DiscountRed
+            )
+
+        val DiscountPrice: TextStyle
+            @Composable
+            get() = MaterialTheme.typography.titleMedium.copy(
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+
+        val OriginalPrice: TextStyle
+            @Composable
+            get() = MaterialTheme.typography.bodySmall.copy(
+                textDecoration = TextDecoration.LineThrough,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+
+        val SinglePrice: TextStyle
+            @Composable
+            get() = MaterialTheme.typography.titleMedium.copy(
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+    }
+}
+
 
 /**
  * 상품 정보를 표시하는 UI 컴포넌트입니다.
@@ -57,13 +100,13 @@ fun ProductItem(
     val wishIconOffId = R.drawable.ic_btn_heart_off
 
     val isVertical = displayStyle == ProductDisplayStyle.VERTICAL
-    val imageAspectRatio = if (isVertical) ASPECT_RATIO_VERTICAL else ASPECT_RATIO_DEFAULT
+    val imageAspectRatio = if (isVertical) ProductItemConstants.Layout.ASPECT_RATIO_VERTICAL else ProductItemConstants.Layout.ASPECT_RATIO_DEFAULT
     val titleMaxLines = if (isVertical) 1 else 2
 
     Column(
         modifier = modifier
             .width(
-                if (displayStyle == ProductDisplayStyle.HORIZONTAL) WIDTH_HORIZONTAL_ITEM else Modifier.fillMaxWidth()
+                if (displayStyle == ProductDisplayStyle.HORIZONTAL) ProductItemConstants.Layout.WIDTH_HORIZONTAL_ITEM else Modifier.fillMaxWidth()
                     .run { Float.NaN.dp }
             )
             .clickable(onClick = onProductClick)
@@ -85,7 +128,7 @@ fun ProductItem(
                 onClick = onWishClick,
                 modifier = Modifier
                     .align(Alignment.TopEnd)
-                    .padding(PADDING_SMALL)
+                    .padding(ProductItemConstants.Layout.PADDING_SMALL)
             ) {
                 Icon(
                     painter = painterResource(id = if (isFavorite) wishIconOnId else wishIconOffId),
@@ -95,7 +138,7 @@ fun ProductItem(
             }
         }
 
-        Spacer(modifier = Modifier.height(PADDING_MEDIUM))
+        Spacer(modifier = Modifier.height(ProductItemConstants.Layout.PADDING_MEDIUM))
 
         Text(
             text = product.name,
@@ -103,20 +146,20 @@ fun ProductItem(
             overflow = TextOverflow.Ellipsis,
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurface,
-            modifier = Modifier.padding(horizontal = PADDING_SMALL)
+            modifier = Modifier.padding(horizontal = ProductItemConstants.Layout.PADDING_SMALL)
         )
 
-        Spacer(modifier = Modifier.height(PADDING_SMALL))
+        Spacer(modifier = Modifier.height(ProductItemConstants.Layout.PADDING_SMALL))
 
         PriceSection(
             originalPrice = product.originalPrice,
             discountedPrice = product.discountedPrice,
             discountRate = product.discountRate,
             isVertical = isVertical,
-            modifier = Modifier.padding(horizontal = PADDING_SMALL)
+            modifier = Modifier.padding(horizontal = ProductItemConstants.Layout.PADDING_SMALL)
         )
 
-        Spacer(modifier = Modifier.height(PADDING_LARGE))
+        Spacer(modifier = Modifier.height(ProductItemConstants.Layout.PADDING_LARGE))
     }
 }
 
@@ -142,26 +185,26 @@ private fun PriceSection(
 
         if (isVertical) {
             Row(modifier = modifier, verticalAlignment = Alignment.CenterVertically) {
-                Text(text = discountRateText, style = DiscountRateStyle)
-                Spacer(modifier = Modifier.width(PADDING_SMALL))
-                Text(text = discountedPriceText, style = DiscountPriceStyle)
-                Spacer(modifier = Modifier.width(PADDING_SMALL))
-                Text(text = originalPriceText, style = OriginalPriceStyle)
+                Text(text = discountRateText, style = ProductItemConstants.Style.DiscountRate)
+                Spacer(modifier = Modifier.width(ProductItemConstants.Layout.PADDING_SMALL))
+                Text(text = discountedPriceText, style = ProductItemConstants.Style.DiscountPrice)
+                Spacer(modifier = Modifier.width(ProductItemConstants.Layout.PADDING_SMALL))
+                Text(text = originalPriceText, style = ProductItemConstants.Style.OriginalPrice)
             }
         } else {
             Column(modifier = modifier) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(text = discountRateText, style = DiscountRateStyle)
-                    Spacer(modifier = Modifier.width(PADDING_SMALL))
-                    Text(text = discountedPriceText, style = DiscountPriceStyle)
+                    Text(text = discountRateText, style = ProductItemConstants.Style.DiscountRate)
+                    Spacer(modifier = Modifier.width(ProductItemConstants.Layout.PADDING_SMALL))
+                    Text(text = discountedPriceText, style = ProductItemConstants.Style.DiscountPrice)
                 }
-                Text(text = originalPriceText, style = OriginalPriceStyle)
+                Text(text = originalPriceText, style = ProductItemConstants.Style.OriginalPrice)
             }
         }
     } else {
         Text(
             text = stringResource(id = priceFormatId, originalPrice),
-            style = SinglePriceStyle,
+            style = ProductItemConstants.Style.SinglePrice,
             modifier = modifier
         )
     }
@@ -180,40 +223,3 @@ enum class ProductDisplayStyle {
     /** 그리드 스타일 */
     GRID
 }
-
-// Layout Constants
-private const val ASPECT_RATIO_VERTICAL = 1.5f
-private const val ASPECT_RATIO_DEFAULT = 0.75f
-private val WIDTH_HORIZONTAL_ITEM = 150.dp
-private val PADDING_SMALL = 4.dp
-private val PADDING_MEDIUM = 8.dp
-private val PADDING_LARGE = 16.dp
-
-// Typography Styles
-private val DiscountRateStyle: TextStyle
-    @Composable
-    get() = MaterialTheme.typography.titleMedium.copy(
-        fontWeight = FontWeight.Bold,
-        color = DiscountRed
-    )
-
-private val DiscountPriceStyle: TextStyle
-    @Composable
-    get() = MaterialTheme.typography.titleMedium.copy(
-        fontWeight = FontWeight.Bold,
-        color = MaterialTheme.colorScheme.onSurface
-    )
-
-private val OriginalPriceStyle: TextStyle
-    @Composable
-    get() = MaterialTheme.typography.bodySmall.copy(
-        textDecoration = TextDecoration.LineThrough,
-        color = MaterialTheme.colorScheme.onSurfaceVariant
-    )
-
-private val SinglePriceStyle: TextStyle
-    @Composable
-    get() = MaterialTheme.typography.titleMedium.copy(
-        fontWeight = FontWeight.Bold,
-        color = MaterialTheme.colorScheme.onSurface
-    )

@@ -16,15 +16,20 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.kurly.exam.core.ui.component.ProductDisplayStyle
 import com.kurly.exam.core.ui.component.ProductItem
 import com.kurly.exam.core.ui.model.ProductUiModel
+import com.kurly.exam.core.ui.theme.Dimen
 
-/** 그리드 아이템 간의 간격 */
-private val GRID_SPACING = 16.dp
+private object FavoriteConstants {
+    /** 그리드 아이템 간의 간격 */
+    val GRID_SPACING = Dimen.Margin.Large // 16.dp
+
+    /** 찜하기 화면의 그리드 컬럼 수 */
+    const val GRID_COLUMNS = 3
+}
 
 /**
  * 찜하기 화면의 라우트 Composable.
@@ -65,7 +70,7 @@ private fun FavoriteScreen(
     Column(modifier = Modifier.fillMaxSize()) {
         TopAppBar(
             title = { Text(text = stringResource(id = R.string.feature_favorite_app_bar_title)) },
-            windowInsets = WindowInsets(0.dp) // Edge-to-Edge 처리를 위해 WindowInsets 비활성화
+            windowInsets = WindowInsets()
         )
 
         if (favoriteProducts.isEmpty()) {
@@ -82,11 +87,11 @@ private fun FavoriteScreen(
         } else {
             // 찜한 상품 목록을 3열 그리드로 표시
             LazyVerticalGrid(
-                columns = GridCells.Fixed(3),
+                columns = GridCells.Fixed(FavoriteConstants.GRID_COLUMNS),
                 modifier = Modifier.fillMaxSize(),
-                contentPadding = PaddingValues(GRID_SPACING),
-                verticalArrangement = Arrangement.spacedBy(GRID_SPACING),
-                horizontalArrangement = Arrangement.spacedBy(GRID_SPACING)
+                contentPadding = PaddingValues(FavoriteConstants.GRID_SPACING),
+                verticalArrangement = Arrangement.spacedBy(FavoriteConstants.GRID_SPACING),
+                horizontalArrangement = Arrangement.spacedBy(FavoriteConstants.GRID_SPACING)
             ) {
                 items(items = favoriteProducts, key = { it.id }) { product ->
                     ProductItem(

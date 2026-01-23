@@ -8,21 +8,23 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.kurly.exam.core.ui.theme.Dimen
 
-/** 가로 방향 패딩 */
-private val PADDING_HORIZONTAL = 16.dp
-/** 세로 방향 패딩 */
-private val PADDING_VERTICAL = 12.dp
+private object SectionHeaderConstants {
+    /** 가로 방향 패딩 */
+    val PADDING_HORIZONTAL = Dimen.Padding.Large
+    /** 세로 방향 패딩 */
+    val PADDING_VERTICAL = Dimen.Padding.ExtraMedium
 
-/** 섹션 헤더의 텍스트 스타일 */
-private val SectionHeaderStyle: TextStyle
-    @Composable
-    get() = MaterialTheme.typography.titleLarge.copy(
-        fontSize = 18.sp,
-        fontWeight = FontWeight.Bold
-    )
+    /** 섹션 헤더의 텍스트 스타일 */
+    val SectionHeaderStyle: TextStyle
+        @Composable
+        get() = MaterialTheme.typography.titleLarge.copy(
+            fontSize = 18.sp,
+            fontWeight = FontWeight.Bold
+        )
+}
 
 /**
  * 메인 화면의 각 섹션 헤더를 표시하는 Composable.
@@ -37,11 +39,14 @@ fun SectionHeader(
 ) {
     Text(
         text = title,
-        style = SectionHeaderStyle,
+        style = SectionHeaderConstants.SectionHeaderStyle,
         color = MaterialTheme.colorScheme.onBackground,
         maxLines = 1,
         overflow = TextOverflow.Ellipsis,
         modifier = modifier
-            .padding(horizontal = PADDING_HORIZONTAL, vertical = PADDING_VERTICAL)
+            .padding(
+                horizontal = SectionHeaderConstants.PADDING_HORIZONTAL,
+                vertical = SectionHeaderConstants.PADDING_VERTICAL
+            )
     )
 }
