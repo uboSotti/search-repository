@@ -39,6 +39,8 @@ import androidx.paging.compose.itemKey
 import com.kurly.exam.feature.main.components.ProductDisplayStyle
 import com.kurly.exam.feature.main.components.ProductItem
 import com.kurly.exam.feature.main.components.SectionHeader
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.ImmutableSet
 
 // Layout Constants
 private val SECTION_DIVIDER_THICKNESS = 10.dp
@@ -51,11 +53,11 @@ private val GRID_COL_SPACING = 12.dp
 @Composable
 fun MainRoute(
     viewModel: MainViewModel = hiltViewModel(),
-    onProductClick: (ProductUiModel) -> Unit = {}
+    onProductClick: (ProductUiModel) -> Unit = {},
 ) {
     val pagingItems = viewModel.pagingDataFlow.collectAsLazyPagingItems()
     val favoriteProductIds by viewModel.favoriteProductIds.collectAsStateWithLifecycle()
-    
+
     val toggleFavorite = remember(viewModel) { viewModel::toggleFavorite }
 
     MainScreen(
@@ -70,15 +72,14 @@ fun MainRoute(
 @Composable
 fun MainScreen(
     pagingItems: LazyPagingItems<SectionUiModel>,
-    favoriteProductIds: Set<Int>,
+    favoriteProductIds: ImmutableSet<Int>,
     onToggleFavorite: (Int) -> Unit,
     onProductClick: (ProductUiModel) -> Unit
 ) {
     Scaffold(
         topBar = {
             TopAppBar(title = { Text(text = stringResource(id = R.string.feature_main_app_bar_title)) })
-        }
-    ) { paddingValues ->
+        }) { paddingValues ->
         val isRefreshing = pagingItems.loadState.refresh is LoadState.Loading
 
         PullToRefreshBox(
@@ -95,10 +96,9 @@ fun MainScreen(
                 // 페이징 아이템 렌더링
                 items(
                     count = pagingItems.itemCount,
-                    key = pagingItems.itemKey { it.sectionId }
-                ) { index ->
+                    key = pagingItems.itemKey { it.sectionId }) { index ->
                     val sectionModel = pagingItems[index]
-                    
+
                     if (sectionModel != null) {
                         SectionItem(
                             sectionModel = sectionModel,
@@ -113,7 +113,7 @@ fun MainScreen(
                 // Append 로딩 및 에러 처리
                 renderLoadStates(pagingItems)
             }
-            
+
             // 초기 로딩 에러 화면
             if (pagingItems.loadState.refresh is LoadState.Error && pagingItems.itemCount == 0) {
                 ErrorView(onRetry = { pagingItems.retry() })
@@ -125,7 +125,7 @@ fun MainScreen(
 @Composable
 private fun SectionItem(
     sectionModel: SectionUiModel,
-    favoriteProductIds: Set<Int>,
+    favoriteProductIds: ImmutableSet<Int>,
     onToggleFavorite: (Int) -> Unit,
     onProductClick: (ProductUiModel) -> Unit,
     isLastItem: Boolean
@@ -164,8 +164,8 @@ private fun SectionItem(
 
 @Composable
 private fun HorizontalSectionContent(
-    products: List<ProductUiModel>,
-    favoriteProductIds: Set<Int>,
+    products: ImmutableList<ProductUiModel>,
+    favoriteProductIds: ImmutableSet<Int>,
     onToggleFavorite: (Int) -> Unit,
     onProductClick: (ProductUiModel) -> Unit
 ) {
@@ -179,16 +179,15 @@ private fun HorizontalSectionContent(
                 isFavorite = favoriteProductIds.contains(product.id),
                 displayStyle = ProductDisplayStyle.HORIZONTAL,
                 onWishClick = { onToggleFavorite(product.id) },
-                onProductClick = { onProductClick(product) }
-            )
+                onProductClick = { onProductClick(product) })
         }
     }
 }
 
 @Composable
 private fun GridSectionContent(
-    products: List<ProductUiModel>,
-    favoriteProductIds: Set<Int>,
+    products: ImmutableList<ProductUiModel>,
+    favoriteProductIds: ImmutableSet<Int>,
     onToggleFavorite: (Int) -> Unit,
     onProductClick: (ProductUiModel) -> Unit
 ) {
@@ -222,8 +221,8 @@ private fun GridSectionContent(
 
 @Composable
 private fun VerticalSectionContent(
-    products: List<ProductUiModel>,
-    favoriteProductIds: Set<Int>,
+    products: ImmutableList<ProductUiModel>,
+    favoriteProductIds: ImmutableSet<Int>,
     onToggleFavorite: (Int) -> Unit,
     onProductClick: (ProductUiModel) -> Unit
 ) {
@@ -246,7 +245,7 @@ private fun SectionDivider() {
     Column {
         Spacer(modifier = Modifier.height(SPACER_HEIGHT_DIVIDER))
         HorizontalDivider(
-            thickness = SECTION_DIVIDER_THICKNESS, 
+            thickness = SECTION_DIVIDER_THICKNESS,
             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f)
         )
     }
@@ -258,6 +257,7 @@ private fun LazyListScope.renderLoadStates(pagingItems: LazyPagingItems<*>) {
         pagingItems.loadState.append is LoadState.Loading -> {
             item { LoadingItem() }
         }
+
         pagingItems.loadState.append is LoadState.Error -> {
             item {
                 ErrorItem(onRetry = { pagingItems.retry() })
@@ -269,8 +269,9 @@ private fun LazyListScope.renderLoadStates(pagingItems: LazyPagingItems<*>) {
 @Composable
 private fun LoadingItem() {
     Box(
-        modifier = Modifier.fillMaxWidth().padding(16.dp),
-        contentAlignment = Alignment.Center
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp), contentAlignment = Alignment.Center
     ) {
         CircularProgressIndicator()
     }
@@ -279,7 +280,9 @@ private fun LoadingItem() {
 @Composable
 private fun ErrorItem(onRetry: () -> Unit) {
     Column(
-        modifier = Modifier.fillMaxWidth().padding(16.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(text = "추가 데이터를 불러오지 못했습니다.", style = MaterialTheme.typography.bodySmall)

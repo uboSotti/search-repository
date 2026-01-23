@@ -7,9 +7,7 @@ plugins {
 
 android {
     namespace = "com.kurly.exam.core.data"
-    compileSdk {
-        version = release(36)
-    }
+    compileSdk = 36
 
     defaultConfig {
         minSdk = 26
@@ -28,6 +26,12 @@ android {
     }
 }
 
+kotlin {
+    compilerOptions {
+        freeCompilerArgs.add("-opt-in=kotlinx.serialization.InternalSerializationApi")
+    }
+}
+
 dependencies {
     // Project Modules
     implementation(project(":core:common"))
@@ -38,15 +42,19 @@ dependencies {
     implementation(libs.retrofit.core)
     implementation(libs.kotlinx.serialization.json)
 
+    // DataStore
+    implementation(libs.androidx.datastore.preferences)
+
     // Hilt
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)
-    
+
     // Paging
     implementation(libs.androidx.paging.runtime)
 
     // Test
     testImplementation(libs.bundles.test.unit)
+    testImplementation(libs.kotlinx.coroutines.test)
     testRuntimeOnly(libs.junit.jupiter.engine)
 
     // Android Test

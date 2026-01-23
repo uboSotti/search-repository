@@ -8,13 +8,19 @@ import androidx.paging.cachedIn
 import androidx.paging.map
 import com.kurly.exam.core.domain.model.Product
 import com.kurly.exam.core.domain.usecase.GetSectionsPagedUseCase
+import com.kurly.exam.core.domain.usecase.ObserveFavoriteProductIdsUseCase
+import com.kurly.exam.core.domain.usecase.ToggleFavoriteUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.ImmutableSet
+import kotlinx.collections.immutable.toImmutableList
+import kotlinx.collections.immutable.toImmutableSet
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 // UI 전용 모델 정의 (Recomposition 최적화를 위해 Immutable 선언)
@@ -40,12 +46,14 @@ data class SectionUiModel(
     val sectionId: Int,
     val title: String,
     val type: String,
-    val products: List<ProductUiModel>
+    val products: ImmutableList<ProductUiModel>
 )
 
 @HiltViewModel
 class MainViewModel @Inject constructor(
-    getSectionsPagedUseCase: GetSectionsPagedUseCase
+    getSectionsPagedUseCase: GetSectionsPagedUseCase,
+    observeFavoriteProductIdsUseCase: ObserveFavoriteProductIdsUseCase,
+    private val toggleFavoriteUseCase: ToggleFavoriteUseCase
 ) : ViewModel() {
 
     // Paging Data Flow
@@ -56,24 +64,25 @@ class MainViewModel @Inject constructor(
                     sectionId = domainModel.section.id,
                     title = domainModel.section.title,
                     type = domainModel.section.type,
-                    products = domainModel.products.map { it.toUiModel() }
+                    products = domainModel.products.map { it.toUiModel() }.toImmutableList()
                 )
             }
         }
         .cachedIn(viewModelScope)
 
     // 찜한 상품 ID 목록
-    private val _favoriteProductIds = MutableStateFlow<Set<Int>>(emptySet())
-    val favoriteProductIds: StateFlow<Set<Int>> = _favoriteProductIds.asStateFlow()
+    val favoriteProductIds: StateFlow<ImmutableSet<Int>> = observeFavoriteProductIdsUseCase()
+        .map { it.toImmutableSet() }
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = kotlinx.collections.immutable.persistentSetOf()
+        )
 
     // 찜하기 토글
     fun toggleFavorite(productId: Int) {
-        _favoriteProductIds.update { currentSet ->
-            if (currentSet.contains(productId)) {
-                currentSet - productId
-            } else {
-                currentSet + productId
-            }
+        viewModelScope.launch {
+            toggleFavoriteUseCase(productId)
         }
     }
 

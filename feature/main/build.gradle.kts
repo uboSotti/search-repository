@@ -42,12 +42,15 @@ dependencies {
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
 
+    // Coroutines
+    implementation(libs.kotlinx.collections.immutable)
+
     // Compose
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.bundles.compose)
     implementation(libs.coil.compose)
     implementation(libs.coil.network.okhttp)
-    
+
     // Paging
     implementation(libs.androidx.paging.compose)
 
@@ -58,6 +61,7 @@ dependencies {
 
     // Test
     testImplementation(libs.bundles.test.unit)
+    testImplementation(libs.kotlinx.coroutines.test)
     testRuntimeOnly(libs.junit.jupiter.engine)
 
     // Android Test
