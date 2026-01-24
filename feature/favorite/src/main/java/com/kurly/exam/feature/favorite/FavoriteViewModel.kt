@@ -4,8 +4,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.kurly.exam.core.domain.usecase.ObserveFavoriteProductsUseCase
 import com.kurly.exam.core.domain.usecase.ToggleFavoriteUseCase
-import com.kurly.exam.core.model.Product
 import com.kurly.exam.core.ui.model.ProductUiModel
+import com.kurly.exam.core.ui.model.toDomain
+import com.kurly.exam.core.ui.model.toUiModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
@@ -35,7 +36,7 @@ class FavoriteViewModel @Inject constructor(
      */
     val favoriteProducts: StateFlow<ImmutableList<ProductUiModel>> =
         observeFavoriteProductsUseCase()
-            .map { products -> products.map { it.toUiModel() }.toImmutableList() }
+            .map { products -> products.map { it.toUiModel(true) }.toImmutableList() }
             .stateIn(
                 scope = viewModelScope,
                 started = SharingStarted.WhileSubscribed(5000),
@@ -51,33 +52,5 @@ class FavoriteViewModel @Inject constructor(
         viewModelScope.launch {
             toggleFavoriteUseCase(productUiModel.toDomain())
         }
-    }
-
-    /**
-     * [Product] 도메인 모델을 [ProductUiModel]로 변환합니다.
-     */
-    private fun Product.toUiModel(): ProductUiModel {
-        return ProductUiModel(
-            id = id,
-            name = name,
-            imageUrl = image,
-            originalPrice = originalPrice,
-            discountedPrice = discountedPrice,
-            isSoldOut = isSoldOut
-        )
-    }
-
-    /**
-     * [ProductUiModel]을 [Product] 도메인 모델로 변환합니다.
-     */
-    private fun ProductUiModel.toDomain(): Product {
-        return Product(
-            id = id,
-            name = name,
-            image = imageUrl,
-            originalPrice = originalPrice,
-            discountedPrice = discountedPrice,
-            isSoldOut = isSoldOut
-        )
     }
 }

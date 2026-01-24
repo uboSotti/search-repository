@@ -24,13 +24,11 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
@@ -41,7 +39,6 @@ import com.kurly.exam.core.ui.model.ProductUiModel
 import com.kurly.exam.core.ui.theme.Dimen
 import com.kurly.exam.feature.main.components.SectionHeader
 import kotlinx.collections.immutable.ImmutableList
-import kotlinx.collections.immutable.ImmutableSet
 
 private object MainConstants {
     val SECTION_DIVIDER_THICKNESS = Dimen.Padding.ExtraMedium
@@ -66,15 +63,13 @@ fun MainRoute(
     viewModel: MainViewModel = hiltViewModel(),
     onProductClick: (ProductUiModel) -> Unit = {},
 ) {
-    val pagingItems = viewModel.pagingDataFlow.collectAsLazyPagingItems()
-    val favoriteProductIds by viewModel.favoriteProductIds.collectAsStateWithLifecycle()
+    val pagingItems = viewModel.sectionUiState.collectAsLazyPagingItems()
 
     // viewModel의 함수를 remember로 감싸 불필요한 리컴포지션을 방지합니다.
     val toggleFavorite = remember(viewModel) { viewModel::toggleFavorite }
 
     MainScreen(
         pagingItems = pagingItems,
-        favoriteProductIds = favoriteProductIds,
         onToggleFavorite = toggleFavorite,
         onProductClick = onProductClick
     )
@@ -85,7 +80,6 @@ fun MainRoute(
  * 섹션 및 상품 목록을 페이징하여 표시하고, 새로고침 기능을 제공합니다.
  *
  * @param pagingItems 페이징된 섹션 UI 모델.
- * @param favoriteProductIds 찜한 상품 ID 집합.
  * @param onToggleFavorite 상품의 찜하기 상태를 토글할 때 호출되는 람다.
  * @param onProductClick 상품 아이템 클릭 시 호출되는 람다.
  */
@@ -93,7 +87,6 @@ fun MainRoute(
 @Composable
 fun MainScreen(
     pagingItems: LazyPagingItems<SectionUiModel>,
-    favoriteProductIds: ImmutableSet<Int>,
     onToggleFavorite: (ProductUiModel) -> Unit,
     onProductClick: (ProductUiModel) -> Unit
 ) {
@@ -122,7 +115,6 @@ fun MainScreen(
                     if (sectionModel != null) {
                         SectionItem(
                             sectionModel = sectionModel,
-                            favoriteProductIds = favoriteProductIds,
                             onToggleFavorite = onToggleFavorite,
                             onProductClick = onProductClick,
                             isLastItem = index == pagingItems.itemCount - 1
@@ -148,7 +140,6 @@ fun MainScreen(
 @Composable
 private fun SectionItem(
     sectionModel: SectionUiModel,
-    favoriteProductIds: ImmutableSet<Int>,
     onToggleFavorite: (ProductUiModel) -> Unit,
     onProductClick: (ProductUiModel) -> Unit,
     isLastItem: Boolean
@@ -159,21 +150,18 @@ private fun SectionItem(
         when (sectionModel.type) {
             "horizontal" -> HorizontalSectionContent(
                 products = sectionModel.products,
-                favoriteProductIds = favoriteProductIds,
                 onToggleFavorite = onToggleFavorite,
                 onProductClick = onProductClick
             )
 
             "grid" -> GridSectionContent(
                 products = sectionModel.products,
-                favoriteProductIds = favoriteProductIds,
                 onToggleFavorite = onToggleFavorite,
                 onProductClick = onProductClick
             )
 
             "vertical" -> VerticalSectionContent(
                 products = sectionModel.products,
-                favoriteProductIds = favoriteProductIds,
                 onToggleFavorite = onToggleFavorite,
                 onProductClick = onProductClick
             )
@@ -190,7 +178,6 @@ private fun SectionItem(
 @Composable
 private fun HorizontalSectionContent(
     products: ImmutableList<ProductUiModel>,
-    favoriteProductIds: ImmutableSet<Int>,
     onToggleFavorite: (ProductUiModel) -> Unit,
     onProductClick: (ProductUiModel) -> Unit
 ) {
@@ -201,7 +188,7 @@ private fun HorizontalSectionContent(
         items(items = products, key = { it.id }) { product ->
             ProductItem(
                 product = product,
-                isFavorite = favoriteProductIds.contains(product.id),
+                isFavorite = product.isFavorite,
                 displayStyle = ProductDisplayStyle.HORIZONTAL,
                 onWishClick = { onToggleFavorite(product) },
                 onProductClick = { onProductClick(product) },
@@ -214,7 +201,6 @@ private fun HorizontalSectionContent(
 @Composable
 private fun GridSectionContent(
     products: ImmutableList<ProductUiModel>,
-    favoriteProductIds: ImmutableSet<Int>,
     onToggleFavorite: (ProductUiModel) -> Unit,
     onProductClick: (ProductUiModel) -> Unit
 ) {
@@ -232,7 +218,7 @@ private fun GridSectionContent(
                     Box(modifier = Modifier.weight(1f)) {
                         ProductItem(
                             product = product,
-                            isFavorite = favoriteProductIds.contains(product.id),
+                            isFavorite = product.isFavorite,
                             displayStyle = ProductDisplayStyle.GRID,
                             onWishClick = { onToggleFavorite(product) },
                             onProductClick = { onProductClick(product) },
@@ -251,7 +237,6 @@ private fun GridSectionContent(
 @Composable
 private fun VerticalSectionContent(
     products: ImmutableList<ProductUiModel>,
-    favoriteProductIds: ImmutableSet<Int>,
     onToggleFavorite: (ProductUiModel) -> Unit,
     onProductClick: (ProductUiModel) -> Unit
 ) {
@@ -259,7 +244,7 @@ private fun VerticalSectionContent(
         products.forEach { product ->
             ProductItem(
                 product = product,
-                isFavorite = favoriteProductIds.contains(product.id),
+                isFavorite = product.isFavorite,
                 displayStyle = ProductDisplayStyle.VERTICAL,
                 onWishClick = { onToggleFavorite(product) },
                 onProductClick = { onProductClick(product) },

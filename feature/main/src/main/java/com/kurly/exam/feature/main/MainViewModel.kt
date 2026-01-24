@@ -14,12 +14,12 @@ import com.kurly.exam.core.ui.model.toDomain
 import com.kurly.exam.core.ui.model.toUiModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.collections.immutable.ImmutableList
-import kotlinx.collections.immutable.ImmutableSet
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.collections.immutable.toImmutableSet
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -57,33 +57,42 @@ class MainViewModel @Inject constructor(
 ) : ViewModel() {
 
     /**
-     * 페이징된 섹션 데이터를 UI 모델로 변환하여 [Flow]로 제공합니다.
-     * 데이터는 [viewModelScope] 내에서 캐시됩니다.
+     * 찜한 상품 ID 목록을 관리하는 private [StateFlow].
      */
-    val pagingDataFlow: Flow<PagingData<SectionUiModel>> = getSectionsPagedUseCase()
-        .map { pagingData ->
+    private val favoriteProductIds: StateFlow<Set<Int>> = observeFavoriteProductIdsUseCase()
+        .map { it.toImmutableSet() }
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = emptySet()
+        )
+
+    /**
+     * combine 연산자에서 여러 번 구독할 수 있도록 PagingData 스트림을 캐시합니다.
+     */
+    private val sectionsPagingData = getSectionsPagedUseCase().cachedIn(viewModelScope)
+
+    /**
+     * 페이징된 섹션 데이터와 찜하기 상태를 결합하여 UI에 노출하는 [Flow].
+     * 찜 상태가 변경되면, PagingData 스트림이 새로운 UI 모델로 업데이트됩니다.
+     */
+    val sectionUiState: Flow<PagingData<SectionUiModel>> =
+        combine(
+            sectionsPagingData,
+            favoriteProductIds
+        ) { pagingData, favoriteIds ->
             pagingData.map { domainModel ->
                 SectionUiModel(
                     sectionId = domainModel.section.id,
                     title = domainModel.section.title,
                     type = domainModel.section.type,
-                    products = domainModel.products.map { it.toUiModel() }.toImmutableList()
+                    products = domainModel.products.map { product ->
+                        product.toUiModel(isFavorite = favoriteIds.contains(product.id))
+                    }.toImmutableList()
                 )
             }
         }
-        .cachedIn(viewModelScope)
 
-    /**
-     * 찜한 상품 ID 목록을 [StateFlow]로 제공합니다.
-     * UI가 구독하는 동안 활성화되며, 5초의 타임아웃을 가집니다.
-     */
-    val favoriteProductIds: StateFlow<ImmutableSet<Int>> = observeFavoriteProductIdsUseCase()
-        .map { it.toImmutableSet() }
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000),
-            initialValue = kotlinx.collections.immutable.persistentSetOf()
-        )
 
     /**
      * 상품의 찜 상태를 토글합니다.
