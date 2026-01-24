@@ -43,7 +43,7 @@ fun FavoriteRoute(
     viewModel: FavoriteViewModel = hiltViewModel(),
     onProductClick: (ProductUiModel) -> Unit = {}
 ) {
-    val favoriteProducts by viewModel.favoriteProducts.collectAsStateWithLifecycle()
+    val favoriteProducts by viewModel.favoriteProductUiState.collectAsStateWithLifecycle()
 
     FavoriteScreen(
         favoriteProducts = favoriteProducts,

@@ -34,7 +34,7 @@ class FavoriteViewModel @Inject constructor(
      * 찜한 상품 목록을 UI 모델([ProductUiModel])의 리스트로 변환하여 [StateFlow]로 제공합니다.
      * 이 Flow는 UI가 구독하는 동안 활성화되며, 5초의 타임아웃을 가집니다.
      */
-    val favoriteProducts: StateFlow<ImmutableList<ProductUiModel>> =
+    val favoriteProductUiState: StateFlow<ImmutableList<ProductUiModel>> =
         observeFavoriteProductsUseCase()
             .map { products -> products.map { it.toUiModel(true) }.toImmutableList() }
             .stateIn(
