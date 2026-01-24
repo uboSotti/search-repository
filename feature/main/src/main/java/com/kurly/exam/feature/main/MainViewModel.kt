@@ -9,8 +9,9 @@ import androidx.paging.map
 import com.kurly.exam.core.domain.usecase.GetSectionsPagedUseCase
 import com.kurly.exam.core.domain.usecase.ObserveFavoriteProductIdsUseCase
 import com.kurly.exam.core.domain.usecase.ToggleFavoriteUseCase
-import com.kurly.exam.core.model.Product
 import com.kurly.exam.core.ui.model.ProductUiModel
+import com.kurly.exam.core.ui.model.toDomain
+import com.kurly.exam.core.ui.model.toUiModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.ImmutableSet
@@ -93,33 +94,5 @@ class MainViewModel @Inject constructor(
         viewModelScope.launch {
             toggleFavoriteUseCase(productUiModel.toDomain())
         }
-    }
-
-    /**
-     * [Product] 도메인 모델을 [ProductUiModel]로 변환합니다.
-     */
-    private fun Product.toUiModel(): ProductUiModel {
-        return ProductUiModel(
-            id = id,
-            name = name,
-            imageUrl = image,
-            originalPrice = originalPrice,
-            discountedPrice = discountedPrice,
-            isSoldOut = isSoldOut
-        )
-    }
-
-    /**
-     * [ProductUiModel]을 [Product] 도메인 모델로 변환합니다.
-     */
-    private fun ProductUiModel.toDomain(): Product {
-        return Product(
-            id = id,
-            name = name,
-            image = imageUrl,
-            originalPrice = originalPrice,
-            discountedPrice = discountedPrice,
-            isSoldOut = isSoldOut
-        )
     }
 }

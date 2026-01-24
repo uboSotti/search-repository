@@ -7,6 +7,8 @@ android {
 }
 
 dependencies {
+    implementation(project(":core:model"))
+
     // UI
     api(libs.coil.compose)
     api(libs.coil.network.okhttp)

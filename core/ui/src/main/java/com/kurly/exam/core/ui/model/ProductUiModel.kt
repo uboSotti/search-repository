@@ -12,10 +12,11 @@ data class ProductUiModel(
     val discountedPrice: Int?,
     val isSoldOut: Boolean
 ) {
-    val discountRate: Int?
-        get() = if (discountedPrice != null && originalPrice > 0) {
+    val discountRate: Int? by lazy(mode = LazyThreadSafetyMode.NONE) {
+        if (discountedPrice != null && originalPrice > 0) {
             ((originalPrice - discountedPrice).toDouble() / originalPrice * 100).toInt()
         } else {
             null
         }
+    }
 }
